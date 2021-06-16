@@ -1,7 +1,6 @@
 #include <cstdio>
 #include <ctime>
 #include "bitboard.h"
-#include "misc.h"
 
 // Measure execution time of a function.
 template<size_t N = 1, bool Avg = true, class Fn, class ...Args>
@@ -17,16 +16,24 @@ clock_t measure_time(Fn &&fn, Args &&...args)
 
 constexpr auto P_ATTACKS = attacks_pawn();
 constexpr auto N_ATTACKS = attacks<KNIGHT>();
+constexpr auto B_ATTACKS = attacks<BISHOP>();
+constexpr auto R_ATTACKS = attacks<ROOK>();
+constexpr auto Q_ATTACKS = attacks<QUEEN>();
+constexpr auto K_ATTACKS = attacks<KING>();
 
 int main(int, char**) 
 {
-    printf("bit:    %ld clock_t\n", 
-        measure_time<100000, false>(bit, H8));
-
     Bitboard bb = 0xff00ff00ff00ff00;
+    Square s = E4;
 
+    printf("bit:    %ld clock_t\n", measure_time<100000, false>(bit, s));
+    
     print_bb(bb);
-    print_bb(P_ATTACKS[WHITE][A1]);
-    print_bb(P_ATTACKS[BLACK][E2]);
-    print_bb(N_ATTACKS[F7]);
+    print_bb(P_ATTACKS[WHITE][s]);
+    print_bb(P_ATTACKS[BLACK][s]);
+    print_bb(N_ATTACKS[s]);
+    print_bb(B_ATTACKS[s]);
+    print_bb(R_ATTACKS[s]);
+    print_bb(Q_ATTACKS[s]);
+    print_bb(K_ATTACKS[s]);
 }

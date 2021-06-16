@@ -4,9 +4,9 @@
 #include "defs.h"
 #include "misc.h"
 
-constexpr Bitboard SQUARES_WHITE    = 0x55AA55AA55AA55AAULL;
-constexpr Bitboard SQUARES_BLACK    = 0xAA55AA55AA55AA55ULL;
-constexpr Bitboard SQUARES_BORDER   = 0xFF818181818181FFULL;
+constexpr Bitboard SQUARES_WHITE    = 0x55aa55aa55aa55aaULL;
+constexpr Bitboard SQUARES_BLACK    = 0xaa55aa55aa55aa55ULL;
+constexpr Bitboard SQUARES_BORDER   = 0xff818181818181ffULL;
 
 constexpr Bitboard FILE_A_BB = 0x0101010101010101ULL;
 constexpr Bitboard FILE_B_BB = FILE_A_BB << 1;
@@ -17,7 +17,7 @@ constexpr Bitboard FILE_F_BB = FILE_A_BB << 5;
 constexpr Bitboard FILE_G_BB = FILE_A_BB << 6;
 constexpr Bitboard FILE_H_BB = FILE_A_BB << 7;
 
-constexpr Bitboard RANK_1_BB = 0xFFULL;
+constexpr Bitboard RANK_1_BB = 0xffULL;
 constexpr Bitboard RANK_2_BB = RANK_1_BB << (8 * 1);
 constexpr Bitboard RANK_3_BB = RANK_1_BB << (8 * 2);
 constexpr Bitboard RANK_4_BB = RANK_1_BB << (8 * 3);
@@ -41,7 +41,7 @@ constexpr void print_bb(Bitboard bb)
     for (File f = FILE_A; f <= FILE_H; ++f)
         PRINT(" %c", FILE_STR[f]);
     PRINT("\n\n");
-    PRINT("Hex: %016lX\n", bb);
+    PRINT("Hex: %016lX \n", bb);
     PUTC('\n');
 }
 
@@ -71,6 +71,24 @@ template<class T, class ...Args>
 constexpr Bitboard shift(Bitboard b, T d, Args... dirs)
 {
     return shift(b, d) | shift(b, dirs...);
+}
+
+template<Piece P>
+constexpr Bitboard attacks_sliding(Square s, Bitboard block)
+{
+    const auto dir = P == BISHOP ? 
+        std::array{ NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST } : 
+        std::array{ NORTH, EAST, SOUTH, WEST };
+
+    Bitboard att = 0;
+    Bitboard bb = bit(s);
+
+    for (const auto d : dir) {
+        auto dst = bb;
+        while ((dst = shift(dst, d)) && !(dst & block))
+            att |= dst;
+    }
+    return att;
 }
 
 constexpr auto attacks_pawn()
@@ -114,13 +132,26 @@ constexpr auto attacks()
                     std::array{ SOUTH, SOUTH, WEST});
                 break;
             case BISHOP:
+                att[s] = attacks_sliding<BISHOP>(s, 0);
+                break;
             case ROOK:
+                att[s] = attacks_sliding<ROOK>(s, 0);
+                break;
             case QUEEN:
+                att[s] = attacks_sliding<BISHOP>(s, 0) | attacks_sliding<ROOK>(s, 0);
+                break;
             case KING:
-            default: return att;
+                att[s] = shift(bb, NORTH, EAST, SOUTH, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST);   
+                break;
         }
     }
     return att;
+}
+
+template<Piece P>
+inline auto attacks_magic(const Bitboard *magic_nums)
+{
+    static_assert(P == BISHOP || P == ROOK, "Only for bishop and rook");
 }
 
 #endif // BITBOARD_H
