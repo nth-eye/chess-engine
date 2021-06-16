@@ -6,6 +6,8 @@
 
 using Bitboard = uint64_t;
 
+enum Color  { WHITE, BLACK, BOTH };
+enum Piece  { EMPTY, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, PIECE_num };
 enum File   { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_num };
 enum Rank   { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_num };
 enum Square {  
@@ -18,6 +20,16 @@ enum Square {
     A7, B7, C7, D7, E7, F7, G7, H7,
     A8, B8, C8, D8, E8, F8, G8, H8, 
     SQ_num,
+};
+enum Direction {
+    NORTH =  8,
+    EAST  =  1,
+    SOUTH = -NORTH,
+    WEST  = -EAST,
+    NORTH_EAST = NORTH + EAST,
+    SOUTH_EAST = SOUTH + EAST,
+    SOUTH_WEST = SOUTH + WEST,
+    NORTH_WEST = NORTH + WEST
 };
 
 #endif // DEFS_H

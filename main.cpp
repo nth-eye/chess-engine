@@ -15,12 +15,18 @@ clock_t measure_time(Fn &&fn, Args &&...args)
     return Avg ? res / N : res;
 }
 
+constexpr auto P_ATTACKS = attacks_pawn();
+constexpr auto N_ATTACKS = attacks<KNIGHT>();
+
 int main(int, char**) 
 {
-    Bitboard bb = 0xff00ff00ff00ff00;
-
-    printf("Shift:  %3ld clock_t\n", 
+    printf("bit:    %ld clock_t\n", 
         measure_time<100000, false>(bit, H8));
 
+    Bitboard bb = 0xff00ff00ff00ff00;
+
     print_bb(bb);
+    print_bb(P_ATTACKS[WHITE][A1]);
+    print_bb(P_ATTACKS[BLACK][E2]);
+    print_bb(N_ATTACKS[F7]);
 }
