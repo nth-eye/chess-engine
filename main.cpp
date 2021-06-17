@@ -23,17 +23,23 @@ constexpr auto K_ATTACKS = attacks<KING>();
 
 int main(int, char**) 
 {
-    Bitboard bb = 0xff00ff00ff00ff00;
-    Square s = E4;
+    Square s        = A6;
+    Bitboard block  = bit(E6) | bit(A3);
 
-    printf("bit:    %ld clock_t\n", measure_time<100000, false>(bit, s));
-    
-    print_bb(bb);
-    print_bb(P_ATTACKS[WHITE][s]);
-    print_bb(P_ATTACKS[BLACK][s]);
-    print_bb(N_ATTACKS[s]);
-    print_bb(B_ATTACKS[s]);
-    print_bb(R_ATTACKS[s]);
-    print_bb(Q_ATTACKS[s]);
-    print_bb(K_ATTACKS[s]);
+    // printf("bit:    %ld clock_t\n", measure_time<100000, false>(bit, s));
+
+    // print_bb(SQ_EDGES);
+    // print_bb(P_ATTACKS[WHITE][s]);
+    // print_bb(P_ATTACKS[BLACK][s]);
+    // print_bb(N_ATTACKS[s]);
+    // print_bb(B_ATTACKS[s]);
+    // print_bb(R_ATTACKS[s]);
+    // print_bb(Q_ATTACKS[s]);
+    // print_bb(K_ATTACKS[s]);
+
+    auto sliding = attacks_sliding<ROOK>(s, block);
+    auto occupancy = attacks_occupancy<ROOK>(s);
+
+    print_bb(sliding);
+    print_bb(occupancy);
 }

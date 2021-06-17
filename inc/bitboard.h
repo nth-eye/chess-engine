@@ -4,27 +4,17 @@
 #include "defs.h"
 #include "misc.h"
 
-constexpr Bitboard SQUARES_WHITE    = 0x55aa55aa55aa55aaULL;
-constexpr Bitboard SQUARES_BLACK    = 0xaa55aa55aa55aa55ULL;
-constexpr Bitboard SQUARES_BORDER   = 0xff818181818181ffULL;
+constexpr Bitboard SQ_WHITE = 0x55aa55aa55aa55aaULL;
+constexpr Bitboard SQ_BLACK = 0xaa55aa55aa55aa55ULL;
+constexpr Bitboard SQ_EDGES = 0xff818181818181ffULL;
 
-constexpr Bitboard FILE_A_BB = 0x0101010101010101ULL;
-constexpr Bitboard FILE_B_BB = FILE_A_BB << 1;
-constexpr Bitboard FILE_C_BB = FILE_A_BB << 2;
-constexpr Bitboard FILE_D_BB = FILE_A_BB << 3;
-constexpr Bitboard FILE_E_BB = FILE_A_BB << 4;
-constexpr Bitboard FILE_F_BB = FILE_A_BB << 5;
-constexpr Bitboard FILE_G_BB = FILE_A_BB << 6;
-constexpr Bitboard FILE_H_BB = FILE_A_BB << 7;
+constexpr Bitboard RANK_BB = 0xffULL;
+constexpr Bitboard FILE_BB = 0x0101010101010101ULL;
 
-constexpr Bitboard RANK_1_BB = 0xffULL;
-constexpr Bitboard RANK_2_BB = RANK_1_BB << (8 * 1);
-constexpr Bitboard RANK_3_BB = RANK_1_BB << (8 * 2);
-constexpr Bitboard RANK_4_BB = RANK_1_BB << (8 * 3);
-constexpr Bitboard RANK_5_BB = RANK_1_BB << (8 * 4);
-constexpr Bitboard RANK_6_BB = RANK_1_BB << (8 * 5);
-constexpr Bitboard RANK_7_BB = RANK_1_BB << (8 * 6);
-constexpr Bitboard RANK_8_BB = RANK_1_BB << (8 * 7);
+constexpr Bitboard rank_bb(Rank r)          { return RANK_BB << (8 * r); }
+constexpr Bitboard rank_bb(Square s)        { return rank_bb(rank(s)); }
+constexpr Bitboard file_bb(File f)          { return FILE_BB << f; }
+constexpr Bitboard file_bb(Square s)        { return file_bb(file(s)); }
 
 constexpr void print_bb(Bitboard bb)
 {
@@ -50,13 +40,14 @@ constexpr Bitboard shift(Bitboard b, Direction d)
     switch (d) {
         case NORTH:      return  b << 8;
         case SOUTH:      return  b >> 8;
-        case EAST:       return (b & ~FILE_H_BB) << 1;
-        case WEST:       return (b & ~FILE_A_BB) >> 1;
-        case NORTH_EAST: return (b & ~FILE_H_BB) << 9;
-        case NORTH_WEST: return (b & ~FILE_A_BB) << 7;
-        case SOUTH_EAST: return (b & ~FILE_H_BB) >> 7;
-        case SOUTH_WEST: return (b & ~FILE_A_BB) >> 9;
+        case EAST:       return (b & ~file_bb(FILE_H)) << 1;
+        case WEST:       return (b & ~file_bb(FILE_A)) >> 1;
+        case NORTH_EAST: return (b & ~file_bb(FILE_H)) << 9;
+        case NORTH_WEST: return (b & ~file_bb(FILE_A)) << 7;
+        case SOUTH_EAST: return (b & ~file_bb(FILE_H)) >> 7;
+        case SOUTH_WEST: return (b & ~file_bb(FILE_A)) >> 9;
     }
+    return 0;
 }
 
 template<class Arr>
@@ -85,8 +76,11 @@ constexpr Bitboard attacks_sliding(Square s, Bitboard block)
 
     for (const auto d : dir) {
         auto dst = bb;
-        while ((dst = shift(dst, d)) && !(dst & block))
+        while ((dst = shift(dst, d))) {
             att |= dst;
+            if (dst & block)
+                break;
+        }
     }
     return att;
 }
@@ -111,7 +105,7 @@ constexpr auto attacks()
     static_assert(
         P != PAWN && 
         P < PIECE_num, 
-        "Unsupported type");
+        "Unsupported piece");
 
     std::array<Bitboard, SQ_num> att = {};
 
@@ -131,14 +125,10 @@ constexpr auto attacks()
                     std::array{ SOUTH, SOUTH, EAST},
                     std::array{ SOUTH, SOUTH, WEST});
                 break;
-            case BISHOP:
-                att[s] = attacks_sliding<BISHOP>(s, 0);
-                break;
-            case ROOK:
-                att[s] = attacks_sliding<ROOK>(s, 0);
-                break;
-            case QUEEN:
-                att[s] = attacks_sliding<BISHOP>(s, 0) | attacks_sliding<ROOK>(s, 0);
+            case BISHOP: att[s] = attacks_sliding<BISHOP>(s, 0); break;
+            case ROOK:   att[s] = attacks_sliding<ROOK>(s, 0);   break;
+            case QUEEN:  att[s] = attacks_sliding<BISHOP>(s, 0) | 
+                                  attacks_sliding<ROOK>(s, 0);
                 break;
             case KING:
                 att[s] = shift(bb, NORTH, EAST, SOUTH, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST);   
@@ -146,6 +136,15 @@ constexpr auto attacks()
         }
     }
     return att;
+}
+
+template<Piece P>
+constexpr Bitboard attacks_occupancy(Square s)
+{
+    const auto edges = 
+        ((rank_bb(RANK_1) | rank_bb(RANK_8)) & ~rank_bb(s)) | 
+        ((file_bb(FILE_A) | file_bb(FILE_H)) & ~file_bb(s));
+    return attacks_sliding<P>(s, 0) & ~edges;
 }
 
 template<Piece P>
