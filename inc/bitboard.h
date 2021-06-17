@@ -184,15 +184,15 @@ inline auto attacks_magic(const Bitboard *magic_nums)
     for (Square s = A1; s <= H8; ++s) {
 
         const auto mask     = attacks_mask<P>(s);
-        const auto num_bits = cnt(magics[s].mask);
+        const auto n_bits   = cnt(mask);
 
         magics[s].mask      = mask;
-        magics[s].shift     = 64 - num_bits;
+        magics[s].shift     = 64 - n_bits;
         magics[s].magic     = magic_nums[s];
         magics[s].attacks   = &table[offset];
 
         // Build square attacks table for every possible relevant occupancy.
-        for (int idx = 0; idx < bit(num_bits); ++idx) {
+        for (int idx = 0; idx < bit(n_bits); ++idx) {
 
             const auto occ = attacks_occupancy(idx, mask);
             const auto att = attacks_sliding<P>(s, occ);
@@ -200,9 +200,9 @@ inline auto attacks_magic(const Bitboard *magic_nums)
             occ *=  magics[s].magic;
             occ >>= magics[s].shift;
 
-            table[offset + occ] = attacks;
+            table[offset + occ] = att;
         }
-        offset += bit(num_bits);
+        offset += bit(n_bits);
     }
     return std::pair{ &magics, &table };
 }
