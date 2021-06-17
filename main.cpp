@@ -1,5 +1,5 @@
-#include <cstdio>
 #include <ctime>
+#include "log.h"
 #include "bitboard.h"
 
 // Measure execution time of a function.
@@ -26,7 +26,10 @@ int main(int, char**)
     Square s        = A6;
     Bitboard block  = bit(E6) | bit(A3);
 
-    // printf("bit:    %ld clock_t\n", measure_time<100000, false>(bit, s));
+    print_sq(s);
+    print_bb(block);
+
+    printf("cnt:    %ld clock_t \n", measure_time<100000, false>(cnt, SQ_BLACK));
 
     // print_bb(SQ_EDGES);
     // print_bb(P_ATTACKS[WHITE][s]);
@@ -37,9 +40,9 @@ int main(int, char**)
     // print_bb(Q_ATTACKS[s]);
     // print_bb(K_ATTACKS[s]);
 
-    auto sliding = attacks_sliding<ROOK>(s, block);
-    auto occupancy = attacks_occupancy<ROOK>(s);
+    // auto sliding = attacks_sliding<ROOK>(s, block);
+    // auto occupancy = attacks_occupancy<ROOK>(s);
 
-    print_bb(sliding);
-    print_bb(occupancy);
+    // print_bb(sliding);
+    // print_bb(occupancy);
 }

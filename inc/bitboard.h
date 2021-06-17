@@ -16,25 +16,6 @@ constexpr Bitboard rank_bb(Square s)        { return rank_bb(rank(s)); }
 constexpr Bitboard file_bb(File f)          { return FILE_BB << f; }
 constexpr Bitboard file_bb(Square s)        { return file_bb(file(s)); }
 
-constexpr void print_bb(Bitboard bb)
-{
-    PUTC('\n');
-    for (Rank r = RANK_8; r >= RANK_1; --r) {
-        PRINT("%c   ", RANK_STR[r]);
-        for (File f = FILE_A; f <= FILE_H; ++f) {
-            PUTC(get(bb, sq(r, f)) ? 'X' : '-');
-            PUTC(' ');
-        }
-        PUTC('\n');
-    }
-    PRINT("\n   ");
-    for (File f = FILE_A; f <= FILE_H; ++f)
-        PRINT(" %c", FILE_STR[f]);
-    PRINT("\n\n");
-    PRINT("Hex: %016lX \n", bb);
-    PUTC('\n');
-}
-
 constexpr Bitboard shift(Bitboard b, Direction d)
 {
     switch (d) {
@@ -69,7 +50,7 @@ constexpr Bitboard attacks_sliding(Square s, Bitboard block)
 {
     const auto dir = P == BISHOP ? 
         std::array{ NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST } : 
-        std::array{ NORTH, EAST, SOUTH, WEST };
+        std::array{ NORTH,      EAST,       SOUTH,      WEST };
 
     Bitboard att = 0;
     Bitboard bb = bit(s);
@@ -83,6 +64,15 @@ constexpr Bitboard attacks_sliding(Square s, Bitboard block)
         }
     }
     return att;
+}
+
+template<Piece P>
+constexpr Bitboard attacks_occupancy(Square s)
+{
+    const auto edges = 
+        ((rank_bb(RANK_1) | rank_bb(RANK_8)) & ~rank_bb(s)) | 
+        ((file_bb(FILE_A) | file_bb(FILE_H)) & ~file_bb(s));
+    return attacks_sliding<P>(s, 0) & ~edges;
 }
 
 constexpr auto attacks_pawn()
@@ -116,19 +106,19 @@ constexpr auto attacks()
         switch (P) {
             case KNIGHT:
                 att[s] = shift(bb, 
-                    std::array{ NORTH, NORTH, EAST}, 
-                    std::array{ NORTH, NORTH, WEST},
-                    std::array{ NORTH, EAST,  EAST},
-                    std::array{ NORTH, WEST,  WEST},
-                    std::array{ SOUTH, EAST,  EAST},
-                    std::array{ SOUTH, WEST,  WEST},
-                    std::array{ SOUTH, SOUTH, EAST},
-                    std::array{ SOUTH, SOUTH, WEST});
+                    std::array{ NORTH, NORTH, EAST }, 
+                    std::array{ NORTH, NORTH, WEST },
+                    std::array{ NORTH, EAST,  EAST },
+                    std::array{ NORTH, WEST,  WEST },
+                    std::array{ SOUTH, EAST,  EAST },
+                    std::array{ SOUTH, WEST,  WEST },
+                    std::array{ SOUTH, SOUTH, EAST },
+                    std::array{ SOUTH, SOUTH, WEST });
                 break;
-            case BISHOP: att[s] = attacks_sliding<BISHOP>(s, 0); break;
-            case ROOK:   att[s] = attacks_sliding<ROOK>(s, 0);   break;
+            case BISHOP: att[s] = attacks_sliding<BISHOP>(s, 0);    break;
+            case ROOK:   att[s] = attacks_sliding<ROOK  >(s, 0);    break;
             case QUEEN:  att[s] = attacks_sliding<BISHOP>(s, 0) | 
-                                  attacks_sliding<ROOK>(s, 0);
+                                  attacks_sliding<ROOK  >(s, 0);
                 break;
             case KING:
                 att[s] = shift(bb, NORTH, EAST, SOUTH, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST);   
@@ -136,15 +126,6 @@ constexpr auto attacks()
         }
     }
     return att;
-}
-
-template<Piece P>
-constexpr Bitboard attacks_occupancy(Square s)
-{
-    const auto edges = 
-        ((rank_bb(RANK_1) | rank_bb(RANK_8)) & ~rank_bb(s)) | 
-        ((file_bb(FILE_A) | file_bb(FILE_H)) & ~file_bb(s));
-    return attacks_sliding<P>(s, 0) & ~edges;
 }
 
 template<Piece P>

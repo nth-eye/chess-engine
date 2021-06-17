@@ -1,17 +1,7 @@
 #ifndef MISC_H
 #define MISC_H
 
-#include <cstdio>
 #include <array>
-
-#define PRINT   printf
-#define PUTC    putchar
-
-#if !defined(PRINT) || !defined(PUTC)
-#define PRINT(...)
-#define PUTC(...)
-#warning "To enable printing define PRINT and PUTC as output mechanisms";
-#endif
 
 #define ENABLE_INC(T)    \
 constexpr T& operator++(T &d)   { return d = T(int(d) + 1); }    \
@@ -30,7 +20,15 @@ constexpr void set(Bitboard &bb, Square s)  { bb |= bit(s); }
 constexpr void clr(Bitboard &bb, Square s)  { bb &= ~bit(s); }
 constexpr bool get(Bitboard bb, Square s)   { return bb & bit(s); }
 
-constexpr const char *RANK_STR = "12345678";
-constexpr const char *FILE_STR = "abcdefgh";
+constexpr int cnt(Bitboard bb)
+{ 
+    bb -= (bb >> 1) & 0x5555555555555555;
+    bb  = (bb & 0x3333333333333333) + ((bb >> 2) & 0x3333333333333333);
+    return (((bb + (bb >> 4)) & 0xF0F0F0F0F0F0F0F) * 0x101010101010101) >> 56;
+}
+constexpr int lsb(Bitboard bb)              { return cnt((bb & -bb) - 1);  }
+
+constexpr char file_c(File f)               { return 'a' + f; }
+constexpr char rank_c(Rank r)               { return '1' + r; }
 
 #endif // MISC_H
