@@ -23,13 +23,23 @@ constexpr auto K_ATTACKS = attacks<KING>();
 
 int main(int, char**) 
 {
-    Square s        = A6;
-    Bitboard block  = bit(E6) | bit(A3);
+    // Square s        = A6;
+    // Bitboard block  = bit(E6) | bit(A3);
 
-    print_sq(s);
-    print_bb(block);
+    // print_sq(s);
+    // print_bb(block);
 
-    printf("cnt:    %ld clock_t \n", measure_time<100000, false>(cnt, SQ_BLACK));
+    // printf("cnt:    %ld clock_t \n", measure_time<100000, false>(cnt, SQ_BLACK));
+
+    Bitboard mask = attacks_mask<ROOK>(A1);
+
+    for (int i = 0; i < 4095; ++i) {
+
+        auto occ = attacks_occupancy(i, mask);
+
+        print_bb(occ);
+        getchar();
+    }
 
     // print_bb(SQ_EDGES);
     // print_bb(P_ATTACKS[WHITE][s]);

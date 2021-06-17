@@ -4,8 +4,10 @@
 #include <array>
 
 #define ENABLE_INC(T)    \
-constexpr T& operator++(T &d)   { return d = T(int(d) + 1); }    \
-constexpr T& operator--(T &d)   { return d = T(int(d) - 1); }
+constexpr T& operator++(T &d)       { return d = T(int(d) + 1); }   \
+constexpr T& operator--(T &d)       { return d = T(int(d) - 1); }   \
+constexpr T operator++(T &d, int)   { T old = d; ++d; return old; } \
+constexpr T operator--(T &d, int)   { T old = d; --d; return old; } \
 
 ENABLE_INC(File)
 ENABLE_INC(Rank)
@@ -15,7 +17,9 @@ constexpr File file(Square s)               { return File(s & 7); }
 constexpr Rank rank(Square s)               { return Rank(s >> 3); }
 constexpr Square sq(Rank r, File f)         { return Square((r << 3) + f); }
 constexpr Bitboard bit(Square s)            { return 1ul << s; }
+constexpr Bitboard bit(int i)               { return 1ul << i; }
 
+constexpr void set(Bitboard &bb, int i)     { bb |= bit(i); }
 constexpr void set(Bitboard &bb, Square s)  { bb |= bit(s); }
 constexpr void clr(Bitboard &bb, Square s)  { bb &= ~bit(s); }
 constexpr bool get(Bitboard bb, Square s)   { return bb & bit(s); }
