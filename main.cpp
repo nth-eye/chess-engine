@@ -20,26 +20,29 @@ constexpr auto B_ATTACKS = attacks<BISHOP>();
 constexpr auto R_ATTACKS = attacks<ROOK>();
 constexpr auto Q_ATTACKS = attacks<QUEEN>();
 constexpr auto K_ATTACKS = attacks<KING>();
+const auto B_MAGICS = attacks_magic<BISHOP>(B_MAGIC_NUM);
+const auto R_MAGICS = attacks_magic<ROOK>(R_MAGIC_NUM);
 
 int main(int, char**) 
 {
-    // Square s        = A6;
-    // Bitboard block  = bit(E6) | bit(A3);
+    Square s        = A6;
+    Bitboard block  = bit(E6) | bit(A3) | bit(G1);
 
-    // print_sq(s);
-    // print_bb(block);
+    print_sq(s);
+    print_bb(block);
+    print_bb(R_MAGICS[s][block]);
 
     // printf("cnt:    %ld clock_t \n", measure_time<100000, false>(cnt, SQ_BLACK));
 
-    Bitboard mask = attacks_mask<ROOK>(A1);
+    // Bitboard mask = attacks_mask<ROOK>(A1);
 
-    for (int i = 0; i < 4095; ++i) {
+    // for (int i = 0; i < 4095; ++i) {
 
-        auto occ = attacks_occupancy(i, mask);
+    //     auto occ = attacks_occupancy(i, mask);
 
-        print_bb(occ);
-        getchar();
-    }
+    //     print_bb(occ);
+    //     getchar();
+    // }
 
     // print_bb(SQ_EDGES);
     // print_bb(P_ATTACKS[WHITE][s]);

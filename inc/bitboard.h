@@ -4,23 +4,20 @@
 #include "defs.h"
 #include "misc.h"
 
-template <typename T>
 struct BitIter {
 
-    constexpr BitIter(T val_) : val(val_) {}
+    constexpr BitIter(Bitboard val_) : val(val_) {}
 
     constexpr bool  operator!=(const BitIter &other)    { return val != other.val; }
     constexpr void  operator++()                        { val &= val - 1; }
-    constexpr int   operator*() const                   { return lsb(val); }
+    constexpr auto  operator*() const                   { return Square(lsb(val)); }
 
     constexpr BitIter begin()   { return val; }
     constexpr BitIter end()     { return 0; }
 private:
-    T val;
+    Bitboard val;
 };
 
-// Structure holding all relevant magic parameters per square.
-// template<size_t S>
 struct Magic {
     
     constexpr Magic() = default;
@@ -28,12 +25,47 @@ struct Magic {
     {
         return attacks[((block & mask) * magic) >> shift];
     };
-    // static constexpr Bitboard attacks[S] = {};
     Bitboard mask       = 0;
     Bitboard magic      = 0;
     Bitboard *attacks   = nullptr;
     uint8_t shift       = 0;
 };
+
+constexpr Bitboard R_MAGIC_NUM[] = {
+    0x088000102088C001ULL, 0x10C0200040001000ULL, 0x83001041000B2000ULL, 0x0680280080041000ULL, 
+    0x488004000A080080ULL, 0x0100180400010002ULL, 0x040001C401021008ULL, 0x02000C04A980C302ULL, 
+    0x0000800040082084ULL, 0x5020C00820025000ULL, 0x0001002001044012ULL, 0x0402001020400A00ULL,
+    0x00C0800800040080ULL, 0x4028800200040080ULL, 0x00A0804200802500ULL, 0x8004800040802100ULL, 
+    0x0080004000200040ULL, 0x1082810020400100ULL, 0x0020004010080040ULL, 0x2004818010042800ULL, 
+    0x0601010008005004ULL, 0x4600808002001400ULL, 0x0010040009180210ULL, 0x020412000406C091ULL,
+    0x040084228000C000ULL, 0x8000810100204000ULL, 0x0084110100402000ULL, 0x0046001A00204210ULL, 
+    0x2001040080080081ULL, 0x0144020080800400ULL, 0x0840108400080229ULL, 0x0480308A0000410CULL, 
+    0x0460324002800081ULL, 0x620080A001804000ULL, 0x2800802000801006ULL, 0x0002809000800800ULL,
+    0x4C09040080802800ULL, 0x4808800C00800200ULL, 0x0200311004001802ULL, 0x0400008402002141ULL, 
+    0x0410800140008020ULL, 0x000080C001050020ULL, 0x004080204A020010ULL, 0x0224201001010038ULL, 
+    0x0109001108010004ULL, 0x0282004844020010ULL, 0x8228180110040082ULL, 0x0001000080C10002ULL,
+    0x024000C120801080ULL, 0x0001406481060200ULL, 0x0101243200418600ULL, 0x0108800800100080ULL, 
+    0x4022080100100D00ULL, 0x0000843040600801ULL, 0x8301000200CC0500ULL, 0x1000004500840200ULL, 
+    0x1100104100800069ULL, 0x2001008440001021ULL, 0x2002008830204082ULL, 0x0010145000082101ULL,
+    0x01A2001004200842ULL, 0x1007000608040041ULL, 0x000A08100203028CULL, 0x02D4048040290402ULL	};
+
+constexpr Bitboard B_MAGIC_NUM[] = {
+    0x0008201802242020ULL, 0x0021040424806220ULL, 0x4006360602013080ULL, 0x0004410020408002ULL, 
+    0x2102021009001140ULL, 0x08C2021004000001ULL, 0x6001031120200820ULL, 0x1018310402201410ULL, 
+    0x401CE00210820484ULL, 0x001029D001004100ULL, 0x2C00101080810032ULL, 0x0000082581000010ULL,
+    0x10000A0210110020ULL, 0x200002016C202000ULL, 0x0201018821901000ULL, 0x006A0300420A2100ULL, 
+    0x0010014005450400ULL, 0x1008C12008028280ULL, 0x00010010004A0040ULL, 0x3000820802044020ULL, 
+    0x0000800405A02820ULL, 0x8042004300420240ULL, 0x10060801210D2000ULL, 0x0210840500511061ULL,
+    0x0008142118509020ULL, 0x0021109460040104ULL, 0x00A1480090019030ULL, 0x0102008808008020ULL, 
+    0x884084000880E001ULL, 0x040041020A030100ULL, 0x3000810104110805ULL, 0x04040A2006808440ULL, 
+    0x0044040404C01100ULL, 0x4122B80800245004ULL, 0x0044020502380046ULL, 0x0100400888020200ULL,
+    0x01C0002060020080ULL, 0x4008811100021001ULL, 0x8208450441040609ULL, 0x0408004900008088ULL, 
+    0x0294212051220882ULL, 0x000041080810E062ULL, 0x10480A018E005000ULL, 0x80400A0204201600ULL, 
+    0x2800200204100682ULL, 0x0020200400204441ULL, 0x0A500600A5002400ULL, 0x801602004A010100ULL,
+    0x0801841008040880ULL, 0x10010880C4200028ULL, 0x0400004424040000ULL, 0x0401000142022100ULL, 
+    0x00A00010020A0002ULL, 0x1010400204010810ULL, 0x0829910400840000ULL, 0x0004235204010080ULL, 
+    0x1002008143082000ULL, 0x11840044440C2080ULL, 0x2802A02104030440ULL, 0x6100000900840401ULL,
+    0x1C20A15A90420200ULL, 0x0088414004480280ULL, 0x0000204242881100ULL, 0x0240080802809010ULL	};
 
 constexpr Bitboard SQ_WHITE = 0x55aa55aa55aa55aaULL;
 constexpr Bitboard SQ_BLACK = 0xaa55aa55aa55aa55ULL;
@@ -106,9 +138,9 @@ constexpr Bitboard attacks_mask(Square s)
     return attacks_sliding<P>(s, 0) & ~edges;
 }
 
-constexpr Bitboard attacks_occupancy(int idx, Bitboard mask)
+constexpr Bitboard attacks_occupancy(Bitboard idx, Bitboard mask)
 {
-    int n           = 0;
+    Square n        = Square(0);
     Bitboard occ    = 0;
     for (auto b : BitIter(mask)) {
         if (bit(n++) & idx)
@@ -175,9 +207,8 @@ inline auto attacks_magic(const Bitboard *magic_nums)
 {
     static_assert(P == BISHOP || P == ROOK, "Only for bishop and rook");
 
-    // static std::array<Magic<P == ROOK ? 102400 : 5248, 64>> magics;
-    static std::array<Magic, 64> magics = {};
     static std::array<Bitboard, P == ROOK ? 102400 : 5248> table = {};
+    std::array<Magic, 64> magics = {};
 
     size_t offset = 0;
 
@@ -192,10 +223,10 @@ inline auto attacks_magic(const Bitboard *magic_nums)
         magics[s].attacks   = &table[offset];
 
         // Build square attacks table for every possible relevant occupancy.
-        for (int idx = 0; idx < bit(n_bits); ++idx) {
+        for (Bitboard idx = 0; idx < bit(n_bits); ++idx) {
 
-            const auto occ = attacks_occupancy(idx, mask);
-            const auto att = attacks_sliding<P>(s, occ);
+            auto occ = attacks_occupancy(idx, mask);
+            auto att = attacks_sliding<P>(s, occ);
 
             occ *=  magics[s].magic;
             occ >>= magics[s].shift;
@@ -204,7 +235,7 @@ inline auto attacks_magic(const Bitboard *magic_nums)
         }
         offset += bit(n_bits);
     }
-    return std::pair{ &magics, &table };
+    return magics;
 }
 
 #endif // BITBOARD_H
