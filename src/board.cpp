@@ -115,14 +115,18 @@ bool Board::set_pos(const char *c)
 
     constexpr const char *castle_str = "KQkq";
 
-    for (int i = 0; i < 4; ++i, ++c) {
-        if (*c != castle_str[i] &&
-            *c != '-') 
-        {
-            return false;
+    if (*c != '-') {
+        for (int i = 0; i < 4; ++i, ++c) {
+            if (*c != castle_str[i] &&
+                *c != '-') 
+            {
+                return false;
+            }
+            if (*c != '-')
+                castle |= 1 << i;
         }
-        if (*c != '-')
-            castle |= 1 << i;
+    } else {
+        ++c;
     }
     if (*c++ != ' ')
         return false;
