@@ -3,6 +3,12 @@
 #include <cstring>
 #include <cstdlib>
 
+constexpr auto P_ATTACKS = attacks_pawn();
+constexpr auto N_ATTACKS = attacks<KNIGHT>();
+constexpr auto K_ATTACKS = attacks<KING>();
+const auto B_ATTACKS = attacks_magic<BISHOP>(B_MAGIC_NUM);
+const auto R_ATTACKS = attacks_magic<ROOK>(R_MAGIC_NUM);
+
 static bool str_to_int(const char *str, long *val, int base, char **end)
 {
     long res = strtol(str, end, base);
@@ -14,7 +20,7 @@ static bool str_to_int(const char *str, long *val, int base, char **end)
     return false;
 }
 
-void Board::print()
+void Board::print() const
 {
     LOGC('\n');
     for (Rank r = RANK_8; r >= RANK_1; --r) {
@@ -52,6 +58,8 @@ void Board::print()
         castle & WKCA ? 'K' : '-', castle & WQCA ? 'Q' : '-', 
         castle & BKCA ? 'k' : '-', castle & BQCA ? 'q' : '-');
     LOG("enps:  %c          \n", enpass() ? file_c(File(enpass() - 1)) : '-');
+    LOG("half:  %u          \n", half_clk);
+    LOG("full:  %u          \n", full_clk);
     LOG("side:  %c          \n", side_c(side));
     LOG("size:  %lu bytes   \n", sizeof(Board));
     LOGC('\n');
@@ -170,4 +178,27 @@ bool Board::set_pos(const char *c)
     LOG("%s: remainder - [%s] \n", __func__, end);
 
     return true;
+}
+
+bool Board::attacked(Square s, Color att_clr) const 
+{
+    Bitboard they = pieces[att_clr];
+
+    // Check bishops and queens
+    if (B_ATTACKS[s][all()] & they & bishops)
+        return true;
+    // Check rooks and queens
+    if (R_ATTACKS[s][all()] & they & rooks)
+        return true;
+    // Check pawns
+    if (P_ATTACKS[!att_clr][s] & they & pawns())
+        return true;
+    // Check knights
+    if (N_ATTACKS[s] & they & knights())
+        return true;
+    // Check king
+    if (K_ATTACKS[s] & they & kings)
+        return true;
+
+    return false;
 }
