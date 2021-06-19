@@ -3,6 +3,7 @@
 
 #include "defs.h"
 #include "misc.h"
+#include <array>
 
 struct BitIter {
 
@@ -70,6 +71,7 @@ constexpr Bitboard B_MAGIC_NUM[] = {
 constexpr Bitboard SQ_WHITE = 0x55aa55aa55aa55aaULL;
 constexpr Bitboard SQ_BLACK = 0xaa55aa55aa55aa55ULL;
 constexpr Bitboard SQ_EDGES = 0xff818181818181ffULL;
+constexpr Bitboard SQ_ENPS  = 0x00ffffffffffff00ULL;
 
 constexpr Bitboard RANK_BB = 0xffULL;
 constexpr Bitboard FILE_BB = 0x0101010101010101ULL;
@@ -111,14 +113,14 @@ constexpr Bitboard shift(Bitboard b, T d, Args... dirs)
 template<Piece P>
 constexpr Bitboard attacks_sliding(Square s, Bitboard block)
 {
-    const auto dir = P == BISHOP ? 
+    auto dir = P == BISHOP ? 
         std::array{ NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST } : 
         std::array{ NORTH,      EAST,       SOUTH,      WEST };
 
     Bitboard att = 0;
     Bitboard bb = bit(s);
 
-    for (const auto d : dir) {
+    for (auto d : dir) {
         auto dst = bb;
         while ((dst = shift(dst, d))) {
             att |= dst;
@@ -132,7 +134,7 @@ constexpr Bitboard attacks_sliding(Square s, Bitboard block)
 template<Piece P>
 constexpr Bitboard attacks_mask(Square s)
 {
-    const auto edges = 
+    Bitboard edges = 
         ((rank_bb(RANK_1) | rank_bb(RANK_8)) & ~rank_bb(s)) | 
         ((file_bb(FILE_A) | file_bb(FILE_H)) & ~file_bb(s));
     return attacks_sliding<P>(s, 0) & ~edges;
@@ -140,7 +142,7 @@ constexpr Bitboard attacks_mask(Square s)
 
 constexpr Bitboard attacks_occupancy(Bitboard idx, Bitboard mask)
 {
-    Square n        = Square(0);
+    int n           = 0;
     Bitboard occ    = 0;
     for (auto b : BitIter(mask)) {
         if (bit(n++) & idx)
@@ -151,7 +153,7 @@ constexpr Bitboard attacks_occupancy(Bitboard idx, Bitboard mask)
 
 constexpr auto attacks_pawn()
 {
-    std::array<std::array<Bitboard, SQ_num>, 2> att = {};
+    std::array<Bitboard[SQ_num], 2> att = {};
 
     for (Square s = A1; s <= H8; ++s) {
 
@@ -207,7 +209,7 @@ inline auto attacks_magic(const Bitboard *magic_nums)
 {
     static_assert(P == BISHOP || P == ROOK, "Only for bishop and rook");
 
-    static std::array<Bitboard, P == ROOK ? 102400 : 5248> table = {};
+    static Bitboard table[P == ROOK ? 102400 : 5248];
     std::array<Magic, 64> magics = {};
 
     size_t offset = 0;

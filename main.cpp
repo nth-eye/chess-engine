@@ -1,6 +1,6 @@
 #include <ctime>
 #include "log.h"
-#include "bitboard.h"
+#include "board.h"
 
 // Measure execution time of a function.
 template<size_t N = 1, bool Avg = true, class Fn, class ...Args>
@@ -28,9 +28,13 @@ int main(int, char**)
     Square s        = A6;
     Bitboard block  = bit(E6) | bit(A3) | bit(G1);
 
-    print_sq(s);
+    print_bb(R_ATTACKS[s]);
     print_bb(block);
     print_bb(R_MAGICS[s][block]);
+
+    Board board;
+
+    board.print();
 
     // printf("cnt:    %ld clock_t \n", measure_time<100000, false>(cnt, SQ_BLACK));
 

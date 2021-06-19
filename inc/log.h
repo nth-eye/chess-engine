@@ -35,8 +35,13 @@ constexpr void print_bb(Bitboard bb)
     for (File f = FILE_A; f <= FILE_H; ++f)
         LOG(" %c", file_c(f));
     LOG("\n\n");
-    LOG("Hex: %016lX \n", bb);
+    LOG("hex:   %016lx \n", bb);
     LOGC('\n');
 }
+
+// constexpr void print_board()
+// {
+
+// }
 
 #endif // LOG_H

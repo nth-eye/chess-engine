@@ -6,7 +6,7 @@
 
 using Bitboard = uint64_t;
 
-enum Color  { WHITE, BLACK, BOTH };
+enum Color  { WHITE, BLACK, COLOR_num };
 enum Piece  { EMPTY, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, PIECE_num };
 enum File   { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_num };
 enum Rank   { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_num };
@@ -21,15 +21,28 @@ enum Square {
     A8, B8, C8, D8, E8, F8, G8, H8, 
     SQ_num,
 };
+enum Castle { 
+    CASTLE_NO, 
+    WKCA        = 0b0001,
+    WQCA        = 0b0010, 
+    BKCA        = 0b0100, 
+    BQCA        = 0b1000,
+    KCA         = WKCA | BKCA,
+    QCA         = WQCA | BQCA,
+    WCA         = WKCA | WQCA,
+    BCA         = BKCA | BQCA,
+    CASTLE_ANY  = WCA  | BCA,
+    CASTLE_num,
+};
 enum Direction {
-    NORTH =  8,
-    EAST  =  1,
-    SOUTH = -NORTH,
-    WEST  = -EAST,
-    NORTH_EAST = NORTH + EAST,
-    SOUTH_EAST = SOUTH + EAST,
-    SOUTH_WEST = SOUTH + WEST,
-    NORTH_WEST = NORTH + WEST
+    NORTH       =  8,
+    EAST        =  1,
+    SOUTH       = -NORTH,
+    WEST        = -EAST,
+    NORTH_EAST  = NORTH + EAST,
+    SOUTH_EAST  = SOUTH + EAST,
+    SOUTH_WEST  = SOUTH + WEST,
+    NORTH_WEST  = NORTH + WEST,
 };
 
 #endif // DEFS_H
