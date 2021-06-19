@@ -1,7 +1,18 @@
 #include "board.h"
 #include "log.h"
 #include <cstring>
-#include <cctype>
+#include <cstdlib>
+
+static bool str_to_int(const char *str, long *val, int base, char **end)
+{
+    long res = strtol(str, end, base);
+
+    if (*end > str) {
+        *val = res;
+        return true;
+    }
+    return false;
+}
 
 void Board::print()
 {
@@ -40,7 +51,7 @@ void Board::print()
     LOG("cast:  %c%c%c%c    \n", 
         castle & WKCA ? 'K' : '-', castle & WQCA ? 'Q' : '-', 
         castle & BKCA ? 'k' : '-', castle & BQCA ? 'q' : '-');
-    LOG("enps:  %c          \n", enpass() ? file_c(File(enpass())) : '-');
+    LOG("enps:  %c          \n", enpass() ? file_c(File(enpass() - 1)) : '-');
     LOG("side:  %c          \n", side_c(side));
     LOG("size:  %lu bytes   \n", sizeof(Board));
     LOGC('\n');
@@ -51,23 +62,22 @@ void Board::clr_pos()
     memset(reinterpret_cast<void*>(this), 0, sizeof(Board));
 }
 
-bool Board::set_pos(const char *fen)
+bool Board::set_pos(const char *c)
 {
-    LOG("%s: %s \n", __func__, fen);
+    LOG("%s: %s \n", __func__, c);
 
     clr_pos();
 
     Square s    = A8;
-    char c      = *fen;
 
-    while (c != ' ') {
+    while (*c != ' ') {
 
-        if (c >= '1' && c <= '8') {
-            s += EAST * (c - '0');
-        } else if (c == '/') {
+        if (*c >= '1' && *c <= '8') {
+            s += EAST * (*c - '0');
+        } else if (*c == '/') {
             s += SOUTH * 2;
         } else {
-            switch (c) {
+            switch (*c) {
                 case 'p':
                 case 'P': set(pawns_en, s); break;
                 case 'n':
@@ -82,59 +92,78 @@ bool Board::set_pos(const char *fen)
                 case 'K': set(kings, s);    break;
                 default: return false;
             }
-            if (c & bit(5))
+            if (*c & bit(5))
                 set(pieces[BLACK], s);
             else
                 set(pieces[WHITE], s);
             ++s;
         }
-        c = *++fen;
+        ++c;
 
         if (s < A1 || s > H8 + 1)
             return false;
     }
-    c = *++fen;
+    ++c;
 
-    switch (c) {
+    switch (*c++) {
         case 'w': side = WHITE; break;
         case 'b': side = BLACK; break;
         default: return false;
     }
-    c = *++fen;
-
-    if (c != ' ')
+    if (*c++ != ' ')
         return false;
-    c = *++fen;
 
     constexpr const char *castle_str = "KQkq";
 
-    for (int i = 0; i < 4; ++i) {
-        if (c != castle_str[i] &&
-            c != '-') 
+    for (int i = 0; i < 4; ++i, ++c) {
+        if (*c != castle_str[i] &&
+            *c != '-') 
         {
             return false;
         }
-        if (c != '-')
+        if (*c != '-')
             castle |= 1 << i;
-        c = *++fen;
     }
-
-    if (c != ' ')
+    if (*c++ != ' ')
         return false;
-    c = *++fen;
 
-    // while (c != ' ') {
-    //     switch (c) {
-    //         case 'k': castle |= BKCA; break;
-    //         case 'K': castle |= WKCA; break;
-    //         case 'q': castle |= BQCA; break;
-    //         case 'Q': castle |= WQCA; break;
-    //         case '-': break;
-    //         default: return false;
-    //     }
-    //     c = *++fen;
-    // }
-    LOG("FINAL c: %c \n", c);
+    if (*c != '-') {
+
+        File f = File(c[0] - 'a');
+        Rank r = Rank(c[1] - '1');
+
+        if (f < FILE_A || 
+            f > FILE_H || 
+            (side == WHITE && r != RANK_6) || 
+            (side == BLACK && r != RANK_3))
+        {
+            return false;
+        }
+        set(pawns_en, sq(RANK_1, f));
+        ++c;
+    }
+    ++c;
+
+    if (*c++ != ' ')
+        return false;
+
+    long val;
+    char *end = NULL;
+
+    if (!str_to_int(c, &val, 10, &end) || val >= 100)
+        return false; 
+    half_clk = val;
+
+    c = end;
+
+    if (*c++ != ' ')
+        return false;
+
+    if (!str_to_int(c, &val, 10, &end) || val < 1)
+        return false; 
+    full_clk = (val - 1) * 2 + side;
+
+    LOG("%s: remainder - [%s] \n", __func__, end);
 
     return true;
 }

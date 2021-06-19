@@ -30,6 +30,8 @@ private:
     Bitboard kings              = 0;
     Castle   castle             = CASTLE_NO;
     Color    side               = WHITE;
+    uint16_t half_clk           = 0;
+    uint16_t full_clk           = 0;
 };
 
 #endif // BOARD_H

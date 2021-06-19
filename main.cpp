@@ -27,7 +27,7 @@ int main(int, char**)
 {
     Board board;
 
-    if (board.set_pos("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq ")) // FEN_START
+    if (board.set_pos("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")) // FEN_START
         board.print();
     else 
         LOG("set_pos: failed \n");
