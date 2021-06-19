@@ -1,15 +1,26 @@
 #ifndef MISC_H
 #define MISC_H
 
-#define ENABLE_INC(T)    \
-constexpr T& operator++(T &d)       { return d = T(int(d) + 1); }   \
-constexpr T& operator--(T &d)       { return d = T(int(d) - 1); }   \
-constexpr T operator++(T &d, int)   { T old = d; ++d; return old; } \
-constexpr T operator--(T &d, int)   { T old = d; --d; return old; }
+#define ENABLE_INC(T)   \
+constexpr T& operator++(T &i)       { return i = T(i + 1); }   \
+constexpr T& operator--(T &i)       { return i = T(i - 1); }   \
+constexpr T operator++(T &i, int)   { T old = i; ++i; return old; } \
+constexpr T operator--(T &i, int)   { T old = i; --i; return old; }
+
+#define ENABLE_ASSIGN(T)    \
+constexpr T& operator+=(T &i, int d) { return i = T(i + d); }   \
+constexpr T& operator-=(T &i, int d) { return i = T(i - d); }   
+
+#define ENABLE_BITWISE(T)   \
+constexpr T& operator|=(T &i, int d)  { return i = T(int(i) | d); }  \
+constexpr T& operator&=(T &i, int d)  { return i = T(int(i) & d); }  \
+constexpr T& operator^=(T &i, int d)  { return i = T(int(i) ^ d); }   
 
 ENABLE_INC(File)
 ENABLE_INC(Rank)
 ENABLE_INC(Square)
+ENABLE_ASSIGN(Square)
+ENABLE_BITWISE(Castle)
 
 // NOTE: Could take Square for type safety, but there are functions which
 // realy use int. Casting them explicitly to Square would be misleading. 

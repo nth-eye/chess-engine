@@ -25,16 +25,19 @@ const auto R_MAGICS = attacks_magic<ROOK>(R_MAGIC_NUM);
 
 int main(int, char**) 
 {
-    Square s        = A6;
-    Bitboard block  = bit(E6) | bit(A3) | bit(G1);
-
-    print_bb(R_ATTACKS[s]);
-    print_bb(block);
-    print_bb(R_MAGICS[s][block]);
-
     Board board;
 
-    board.print();
+    if (board.set_pos("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq ")) // FEN_START
+        board.print();
+    else 
+        LOG("set_pos: failed \n");
+
+    // Square s        = A6;
+    // Bitboard block  = bit(E6) | bit(A3) | bit(G1);
+
+    // print_bb(R_ATTACKS[s]);
+    // print_bb(block);
+    // print_bb(R_MAGICS[s][block]);
 
     // printf("cnt:    %ld clock_t \n", measure_time<100000, false>(cnt, SQ_BLACK));
 

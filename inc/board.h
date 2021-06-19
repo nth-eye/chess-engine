@@ -11,22 +11,25 @@ constexpr auto FEN_TEST_3   = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1
 
 struct Board {
 
-    Board() = default;
+    constexpr Board() = default;
 
     void print();
+    void clr_pos();
+    bool set_pos(const char *fen);
 
     Bitboard all() const        { return pieces[WHITE] | pieces[BLACK]; }
-    Bitboard pawns() const      { return pawns_en & SQ_ENPS; }
+    Bitboard enpass() const     { return pawns_en &  SQ_ENPS; }
+    Bitboard pawns() const      { return pawns_en & ~SQ_ENPS; }
     Bitboard knights() const    { return all() & ~rooks & ~bishops & ~pawns_en & ~kings; }
     Bitboard queens() const     { return rooks & bishops; }
 private:
-    Bitboard pieces[COLOR_num];
-    Bitboard pawns_en;
-    Bitboard bishops;
-    Bitboard rooks;
-    Bitboard kings;
-    Castle   castle;
-    Color    side;
+    Bitboard pieces[COLOR_num]  = {};
+    Bitboard pawns_en           = 0;
+    Bitboard bishops            = 0;
+    Bitboard rooks              = 0;
+    Bitboard kings              = 0;
+    Castle   castle             = CASTLE_NO;
+    Color    side               = WHITE;
 };
 
 #endif // BOARD_H

@@ -71,7 +71,7 @@ constexpr Bitboard B_MAGIC_NUM[] = {
 constexpr Bitboard SQ_WHITE = 0x55aa55aa55aa55aaULL;
 constexpr Bitboard SQ_BLACK = 0xaa55aa55aa55aa55ULL;
 constexpr Bitboard SQ_EDGES = 0xff818181818181ffULL;
-constexpr Bitboard SQ_ENPS  = 0x00ffffffffffff00ULL;
+constexpr Bitboard SQ_ENPS  = 0x00000000000000ffULL;
 
 constexpr Bitboard RANK_BB = 0xffULL;
 constexpr Bitboard FILE_BB = 0x0101010101010101ULL;
