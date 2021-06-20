@@ -9,9 +9,9 @@ struct BitIter {
 
     constexpr BitIter(Bitboard val_) : val(val_) {}
 
-    constexpr bool  operator!=(const BitIter &other)    { return val != other.val; }
-    constexpr void  operator++()                        { val &= val - 1; }
-    constexpr auto  operator*() const                   { return Square(lsb(val)); }
+    constexpr bool  operator!=(const BitIter &other) const  { return val != other.val; }
+    constexpr void  operator++()                            { val &= val - 1; }
+    constexpr auto  operator*() const                       { return Square(lsb(val)); }
 
     constexpr BitIter begin()   { return val; }
     constexpr BitIter end()     { return 0; }
@@ -32,7 +32,7 @@ struct Magic {
     uint8_t shift       = 0;
 };
 
-constexpr Bitboard R_MAGIC_NUM[] = {
+constexpr Bitboard R_MAGIC_NUM[64] = {
     0x088000102088C001ULL, 0x10C0200040001000ULL, 0x83001041000B2000ULL, 0x0680280080041000ULL, 
     0x488004000A080080ULL, 0x0100180400010002ULL, 0x040001C401021008ULL, 0x02000C04A980C302ULL, 
     0x0000800040082084ULL, 0x5020C00820025000ULL, 0x0001002001044012ULL, 0x0402001020400A00ULL,
@@ -50,7 +50,7 @@ constexpr Bitboard R_MAGIC_NUM[] = {
     0x1100104100800069ULL, 0x2001008440001021ULL, 0x2002008830204082ULL, 0x0010145000082101ULL,
     0x01A2001004200842ULL, 0x1007000608040041ULL, 0x000A08100203028CULL, 0x02D4048040290402ULL	};
 
-constexpr Bitboard B_MAGIC_NUM[] = {
+constexpr Bitboard B_MAGIC_NUM[64] = {
     0x0008201802242020ULL, 0x0021040424806220ULL, 0x4006360602013080ULL, 0x0004410020408002ULL, 
     0x2102021009001140ULL, 0x08C2021004000001ULL, 0x6001031120200820ULL, 0x1018310402201410ULL, 
     0x401CE00210820484ULL, 0x001029D001004100ULL, 0x2C00101080810032ULL, 0x0000082581000010ULL,
@@ -73,8 +73,8 @@ constexpr Bitboard SQ_BLACK = 0xaa55aa55aa55aa55ULL;
 constexpr Bitboard SQ_EDGES = 0xff818181818181ffULL;
 constexpr Bitboard SQ_ENPS  = 0x00000000000000ffULL;
 
-constexpr Bitboard RANK_BB = 0xffULL;
-constexpr Bitboard FILE_BB = 0x0101010101010101ULL;
+constexpr Bitboard RANK_BB  = 0x00000000000000ffULL;
+constexpr Bitboard FILE_BB  = 0x0101010101010101ULL;
 
 constexpr Bitboard rank_bb(Rank r)          { return RANK_BB << (8 * r); }
 constexpr Bitboard rank_bb(Square s)        { return rank_bb(rank(s)); }

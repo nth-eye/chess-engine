@@ -18,12 +18,16 @@ int main(int, char**)
 {
     Board board;
 
-    if (board.set_pos("8/8/8/3p4/4P3/8/8/8 w - - 0 1"))
+    if (board.set_pos(FEN_START)) // "8/8/8/3p4/4P3/8/8/8 w - - 0 1"
         board.print();
     else 
         LOG("set_pos: failed \n");
 
-    LOG("attacked: %d \n", board.attacked(E4, BLACK));
+    MoveList moves = board.moves_pseudo();
+
+    print_moves(moves);
+
+    // LOG("attacked: %d \n", board.attacked(E4, BLACK));
 
     // Square s        = A6;
     // Bitboard block  = bit(E6) | bit(A3) | bit(G1);
@@ -31,8 +35,6 @@ int main(int, char**)
     // print_bb(R_ATTACKS[s]);
     // print_bb(block);
     // print_bb(R_MAGICS[s][block]);
-
-    // printf("cnt:    %ld clock_t \n", measure_time<100000, false>(cnt, SQ_BLACK));
 
     // Bitboard mask = attacks_mask<ROOK>(A1);
 

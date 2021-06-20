@@ -3,8 +3,11 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <vector>
 
 using Bitboard = uint64_t;
+using Move = uint16_t;
+using MoveList = std::vector<Move>;
 
 enum Color  { WHITE, BLACK, COLOR_num };
 enum Piece  { EMPTY, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, PIECE_num };
@@ -43,6 +46,21 @@ enum Direction {
     SOUTH_EAST  = SOUTH + EAST,
     SOUTH_WEST  = SOUTH + WEST,
     NORTH_WEST  = NORTH + WEST,
+};
+enum MoveFlag { 
+    QUIET   = 0b0000'0000'0000'0000, 
+    PUSH    = 0b0001'0000'0000'0000,
+    
+    CAPTURE = 0b1000'0000'0000'0000,
+    ENPASS  = 0b1001'0000'0000'0000,
+
+    K_CAST  = 0b0010'0000'0000'0000,
+    Q_CAST  = 0b0011'0000'0000'0000,
+
+    N_PROM  = 0b0100'0000'0000'0000,
+    B_PROM  = 0b0101'0000'0000'0000,
+    R_PROM  = 0b0110'0000'0000'0000,
+    Q_PROM  = 0b0111'0000'0000'0000,
 };
 
 #endif // DEFS_H

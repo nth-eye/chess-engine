@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdlib>
 
+constexpr MoveFlag PROMOTIONS[] = { N_PROM, B_PROM, R_PROM, Q_PROM };
 constexpr auto P_ATTACKS = attacks_pawn();
 constexpr auto N_ATTACKS = attacks<KNIGHT>();
 constexpr auto K_ATTACKS = attacks<KING>();
@@ -81,9 +82,9 @@ bool Board::set_pos(const char *c)
     while (*c != ' ') {
 
         if (*c >= '1' && *c <= '8') {
-            s += EAST * (*c - '0');
+            s += Direction(EAST  * (*c - '0'));
         } else if (*c == '/') {
-            s += SOUTH * 2;
+            s += Direction(SOUTH * 2);
         } else {
             switch (*c) {
                 case 'p':
@@ -201,4 +202,93 @@ bool Board::attacked(Square s, Color att_clr) const
         return true;
 
     return false;
+}
+
+MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
+{
+    Bitboard attacker = pieces[side];
+    Bitboard both     = all();
+
+    MoveList list;
+    list.reserve(100);
+
+    auto save = [&] (Square src, Square dst) 
+    {
+        list.push_back(mv(src, dst));
+    };
+    auto save_f = [&] (Square src, Square dst, MoveFlag flag) 
+    {
+        list.push_back(mv(src, dst, flag));
+    };
+    // Pawn
+    for (auto src : BitIter(attacker & pawns())) {
+
+        Direction dir   = side == WHITE ? NORTH : SOUTH;
+        Square dst      = src + dir;
+        Rank prom       = Rank((7 + side) & 7);
+        Rank push       = Rank(2 + side * 3);
+        
+        if (!get(both, dst)) {
+
+            if (rank(dst) != prom) {
+                // Quiet
+                save_f(src, dst, QUIET);
+                // Double push
+                if (rank(dst) == push && !get(both, dst + dir))
+                    save_f(src, dst + dir, PUSH);
+            } else {
+                // Promotions
+                for (auto type : PROMOTIONS)
+                    save_f(src, dst, type);
+            }
+        }
+        // Captures
+        Bitboard attacked = P_ATTACKS[side][src] & pieces[!side];
+
+        for (auto dst : BitIter(attacked)) {
+            if (rank(dst) == prom) {
+                // Promotions with capture
+                for (auto type : PROMOTIONS)
+                    save_f(src, dst, type | CAPTURE);
+            } else {
+                save(src, dst);
+            }
+        }
+        // enPassant
+        if (enpass()) {
+            File enps_f     = File(enpass());
+            Bitboard enps   = file_bb(enps_f) & P_ATTACKS[side][src];
+
+            if (enps)
+                save_f(src, Square(lsb(enps)), ENPASS);
+        }
+    }
+    // Knight
+    for (auto src : BitIter(attacker & knights())) {
+
+        Bitboard attacked = N_ATTACKS[src]       & ~attacker;
+
+        for (auto dst : BitIter(attacked))
+            save(src, dst);
+    }
+    // Bishop / queen
+    for (auto src : BitIter(attacker & bishops)) {
+
+        Bitboard attacked = B_ATTACKS[src][both] & ~attacker;
+
+        for (auto dst : BitIter(attacked))
+            save(src, dst);
+    }
+    // Rook / queen
+    for (auto src : BitIter(attacker & rooks)) {
+
+        Bitboard attacked = R_ATTACKS[src][both] & ~attacker;
+
+        for (auto dst : BitIter(attacked))
+            save(src, dst);
+    }
+    // King
+    // TODO
+
+    return list;
 }

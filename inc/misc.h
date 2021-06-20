@@ -1,26 +1,32 @@
 #ifndef MISC_H
 #define MISC_H
 
-#define ENABLE_INC(T)   \
-constexpr T& operator++(T &i)       { return i = T(i + 1); }   \
-constexpr T& operator--(T &i)       { return i = T(i - 1); }   \
-constexpr T operator++(T &i, int)   { T old = i; ++i; return old; } \
-constexpr T operator--(T &i, int)   { T old = i; --i; return old; }
+#define ENABLE_INC(T)       \
+constexpr T& operator++(T &t)       { return t = T(t + 1); }        \
+constexpr T& operator--(T &t)       { return t = T(t - 1); }        \
+constexpr T operator++(T &t, int)   { T old = t; ++t; return old; } \
+constexpr T operator--(T &t, int)   { T old = t; --t; return old; }
 
-#define ENABLE_ASSIGN(T)    \
-constexpr T& operator+=(T &i, int d) { return i = T(i + d); }   \
-constexpr T& operator-=(T &i, int d) { return i = T(i - d); }   
+#define ENABLE_MATH(T, D)   \
+constexpr T& operator+=(T &t, D d)  { return t = T(t + d); }    \
+constexpr T& operator-=(T &t, D d)  { return t = T(t - d); }    \
+constexpr T operator+(T t, D d)     { return T(int(t) + d); }   \
+constexpr T operator-(T t, D d)     { return T(int(t) - d); }    
 
-#define ENABLE_BITWISE(T)   \
-constexpr T& operator|=(T &i, int d)  { return i = T(int(i) | d); }  \
-constexpr T& operator&=(T &i, int d)  { return i = T(int(i) & d); }  \
-constexpr T& operator^=(T &i, int d)  { return i = T(int(i) ^ d); }   
+#define ENABLE_BITWISE(T, D)    \
+constexpr T& operator|=(T &t, D d)  { return t = T(t | d); }    \
+constexpr T& operator&=(T &t, D d)  { return t = T(t & d); }    \
+constexpr T& operator^=(T &t, D d)  { return t = T(t ^ d); }    \
+constexpr T operator|(T t, D d)     { return T(int(t) | d); }   \
+constexpr T operator&(T t, D d)     { return T(int(t) & d); }   \
+constexpr T operator^(T t, D d)     { return T(int(t) ^ d); }   
 
 ENABLE_INC(File)
 ENABLE_INC(Rank)
 ENABLE_INC(Square)
-ENABLE_ASSIGN(Square)
-ENABLE_BITWISE(Castle)
+ENABLE_MATH(Square, Direction)
+ENABLE_BITWISE(Castle, int)
+ENABLE_BITWISE(MoveFlag, MoveFlag)
 
 // NOTE: Could take Square for type safety, but there are functions which
 // realy use int. Casting them explicitly to Square would be misleading. 
@@ -28,7 +34,14 @@ constexpr Bitboard bit(int i)               { return 1ul << i; }
 constexpr File file(Square s)               { return File(s & 7); }
 constexpr Rank rank(Square s)               { return Rank(s >> 3); }
 constexpr Square sq(Rank r, File f)         { return Square((r << 3) + f); }
-
+constexpr Square from(Move m)               { return Square(m & 0x3f); }
+constexpr Square to(Move m)                 { return from(m >> 6); }
+constexpr MoveFlag flag(Move m)             { return MoveFlag(m & 0xf000); }
+constexpr Move mv(Square src, Square dst)   { return (dst << 6) | src; }
+constexpr Move mv(Square src, Square dst, MoveFlag flag)   
+{ 
+    return flag | (dst << 6) | src; 
+}
 constexpr void set(Bitboard &bb, Square s)  { bb |= bit(s); }
 constexpr void clr(Bitboard &bb, Square s)  { bb &= ~bit(s); }
 constexpr bool get(Bitboard bb, Square s)   { return bb & bit(s); }
