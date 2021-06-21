@@ -44,10 +44,10 @@ constexpr void print_mv(Move m)
     print_sq(from(m));
     print_sq(to(m));
     switch (flag(m)) {
-        case N_PROM: LOGC('n');
-        case B_PROM: LOGC('b');
-        case R_PROM: LOGC('r');
-        case Q_PROM: LOGC('q');
+        case N_PROM: LOGC('n'); break;
+        case B_PROM: LOGC('b'); break;
+        case R_PROM: LOGC('r'); break;
+        case Q_PROM: LOGC('q'); break;
         default:;
     }
 }

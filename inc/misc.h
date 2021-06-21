@@ -51,7 +51,8 @@ constexpr int cnt(Bitboard bb)
     bb  = (bb & 0x3333333333333333) + ((bb >> 2) & 0x3333333333333333);
     return (((bb + (bb >> 4)) & 0xF0F0F0F0F0F0F0F) * 0x101010101010101) >> 56;
 }
-constexpr int lsb(Bitboard bb)              { return cnt((bb & -bb) - 1);  }
+constexpr Square lsb(Bitboard bb)           { return Square(cnt((bb & -bb) - 1));  }
+constexpr Color operator~(Color c)          { return Color(c ^ BLACK); }
 
 constexpr char file_c(File f)               { return 'a' + f; }
 constexpr char rank_c(Rank r)               { return '1' + r; }

@@ -2,13 +2,37 @@
 #include "log.h"
 #include <cstring>
 #include <cstdlib>
+#include <algorithm>
 
+constexpr Square CASTLE_SQ[][2] = { { H1, A1 }, { H8, A8 } };
 constexpr MoveFlag PROMOTIONS[] = { N_PROM, B_PROM, R_PROM, Q_PROM };
 constexpr auto P_ATTACKS = attacks_pawn();
 constexpr auto N_ATTACKS = attacks<KNIGHT>();
 constexpr auto K_ATTACKS = attacks<KING>();
 const auto B_ATTACKS = attacks_magic<BISHOP>(B_MAGIC_NUM);
 const auto R_ATTACKS = attacks_magic<ROOK>(R_MAGIC_NUM);
+
+constexpr int CASTLE_PERM_FROM[64] = {
+    0xD, 0xF, 0xF, 0xF, 0xC, 0xF, 0xF, 0xE,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0x7, 0xF, 0xF, 0xF, 0x3, 0xF, 0xF, 0xB  
+};
+
+constexpr int CASTLE_PERM_TO[64] = {
+    0xD, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xE,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
+    0x7, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xB 
+};
 
 static bool str_to_int(const char *str, long *val, int base, char **end)
 {
@@ -33,7 +57,7 @@ void Board::print() const
 
             if (!get(all(), s))
                 c = '.';
-            else if (get(kings, s))
+            else if (get(kings(), s))
                 c = 'k';
             else if (get(pawns(), s))
                 c = 'p';
@@ -58,7 +82,7 @@ void Board::print() const
     LOG("cast:  %c%c%c%c    \n", 
         castle & WKCA ? 'K' : '-', castle & WQCA ? 'Q' : '-', 
         castle & BKCA ? 'k' : '-', castle & BQCA ? 'q' : '-');
-    LOG("enps:  %c          \n", enpass() ? file_c(File(enpass() - 1)) : '-');
+    LOG("enps:  %c          \n", enpass() ? file_c(File(lsb(enpass()))) : '-');
     LOG("half:  %u          \n", half_clk);
     LOG("full:  %u          \n", full_clk);
     LOG("side:  %c          \n", side_c(side));
@@ -77,7 +101,7 @@ bool Board::set_pos(const char *c)
 
     clr_pos();
 
-    Square s    = A8;
+    Square s = A8;
 
     while (*c != ' ') {
 
@@ -97,8 +121,8 @@ bool Board::set_pos(const char *c)
                 case 'Q': set(bishops, s);
                 case 'r':
                 case 'R': set(rooks, s);    break;
-                case 'k':
-                case 'K': set(kings, s);    break;
+                case 'k': k_sq[BLACK] = s;  break;
+                case 'K': k_sq[WHITE] = s;  break;
                 default: return false;
             }
             if (*c & bit(5))
@@ -184,21 +208,22 @@ bool Board::set_pos(const char *c)
 bool Board::attacked(Square s, Color att_clr) const 
 {
     Bitboard they = pieces[att_clr];
+    Bitboard king = bit(k_sq[att_clr]);
 
-    // Check bishops and queens
-    if (B_ATTACKS[s][all()] & they & bishops)
+    // Bishops and queens
+    if (B_ATTACKS[s][all()]     & they & bishops)
         return true;
-    // Check rooks and queens
-    if (R_ATTACKS[s][all()] & they & rooks)
+    // Rooks and queens
+    if (R_ATTACKS[s][all()]     & they & rooks)
         return true;
-    // Check pawns
-    if (P_ATTACKS[!att_clr][s] & they & pawns())
+    // Pawns
+    if (P_ATTACKS[!att_clr][s]  & they & pawns())
         return true;
-    // Check knights
-    if (N_ATTACKS[s] & they & knights())
+    // Knights
+    if (N_ATTACKS[s]            & they & knights())
         return true;
-    // Check king
-    if (K_ATTACKS[s] & they & kings)
+    // King
+    if (K_ATTACKS[s]            & king)
         return true;
 
     return false;
@@ -208,6 +233,7 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
 {
     Bitboard attacker = pieces[side];
     Bitboard both     = all();
+    Square king       = k_sq[side];
 
     MoveList list;
     list.reserve(100);
@@ -219,6 +245,24 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
     auto save_f = [&] (Square src, Square dst, MoveFlag flag) 
     {
         list.push_back(mv(src, dst, flag));
+    };
+    auto path_free = [&] (Square src, Square dst) 
+    {
+        while (src != dst) {
+            if (get(both, src))
+                return false;
+            ++src;
+        }
+        return true;
+    };
+    auto path_attacked = [this] (Square src, Square dst) 
+    {
+        while (src != dst) {
+            if (attacked(src, ~side))
+                return true;
+            ++src;
+        }
+        return false;
     };
     // Pawn
     for (auto src : BitIter(attacker & pawns())) {
@@ -243,24 +287,25 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
             }
         }
         // Captures
-        Bitboard attacked = P_ATTACKS[side][src] & pieces[!side];
+        Bitboard attacked = P_ATTACKS[side][src] & pieces[~side];
 
         for (auto dst : BitIter(attacked)) {
             if (rank(dst) == prom) {
                 // Promotions with capture
                 for (auto type : PROMOTIONS)
-                    save_f(src, dst, type | CAPTURE);
+                    save_f(src, dst, type);
             } else {
                 save(src, dst);
             }
         }
         // enPassant
         if (enpass()) {
-            File enps_f     = File(enpass());
-            Bitboard enps   = file_bb(enps_f) & P_ATTACKS[side][src];
+            File enps_f     = File(lsb(enpass()));
+            Rank enps_r     = Rank(RANK_8 - push);
+            Square enps     = sq(enps_r, enps_f);
 
-            if (enps)
-                save_f(src, Square(lsb(enps)), ENPASS);
+            if (bit(enps) & P_ATTACKS[side][src])
+                save_f(src, enps, ENPASS);
         }
     }
     // Knight
@@ -288,7 +333,131 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
             save(src, dst);
     }
     // King
-    // TODO
+    Bitboard attacked = K_ATTACKS[king] & ~attacker;
 
+    for (const auto dst : BitIter(attacked)) 
+        save(king, dst);
+
+    auto ca_rights = castle >> (2 * side); 
+
+    if (ca_rights & WKCA) {
+        auto rook = CASTLE_SQ[side][0];
+        if (path_free(king + EAST, rook) && !path_attacked(king, king + Direction(EAST * 2)))
+            save_f(king, king + Direction(EAST * 2), K_CAST);
+    }
+    if (ca_rights & WQCA) {
+        auto rook = CASTLE_SQ[side][1];
+        if (path_free(rook + EAST, king) && !path_attacked(king + WEST, king + EAST))
+            save_f(king, king + Direction(WEST * 2), Q_CAST);
+    }
     return list;
+}
+
+MoveList Board::moves(/*Move *list, size_t max*/) const
+{
+    MoveList list = moves_pseudo();
+    list.erase(
+        std::remove_if(	
+            list.begin(), 
+            list.end(), 
+            [&](Move m) { return !legal(m); }), 
+        list.end());
+    return list;
+}
+
+bool Board::legal(Move move) const 
+{
+    Board board = *this;
+    board.make_move(move);
+    return !board.attacked(k_sq[side], ~side);
+}
+
+void Board::make_move(Move move) 
+{
+    const auto src  = from(move);
+    const auto dst  = to(move);
+    const auto f    = flag(move);
+
+    // Remove en passant square, update castling rules and clocks
+    ++half_clk;
+    ++full_clk;
+    pawns_en    &= ~SQ_ENPS;
+    castle      &= CASTLE_PERM_FROM[src];
+    castle      &= CASTLE_PERM_TO[dst];
+
+    auto do_castle = [this] (Square rook_src, Square rook_dst) 
+    {
+        clr(pieces[side],   rook_src);
+        clr(rooks,          rook_src);
+        set(pieces[side],   rook_dst);
+        set(rooks,          rook_dst);
+    };
+    // Special moves already discovered during generation.
+    switch (f) {
+        default:
+            break;
+        case K_CAST:
+            if (side == WHITE)
+                do_castle(H1, F1);
+            else
+                do_castle(H8, F8);
+            break;
+        case Q_CAST:
+            if (side == WHITE)
+                do_castle(A1, D1);
+            else
+                do_castle(A8, D8);
+            break;
+        case PUSH:
+            set(pawns_en, sq(RANK_1, file(dst)));
+            break;
+        case ENPASS:
+            auto trg = (side == WHITE) ? dst + SOUTH : dst + NORTH;
+            clr(pawns_en,       trg);
+            clr(pieces[~side],  trg);
+            break;
+    }
+    // Remove captured piece.
+    if (get(pieces[~side], dst)) {
+        clr(pieces[~side], dst);
+        clr(rooks, dst);
+        clr(bishops, dst);
+        clr(pawns_en, dst);
+        half_clk = 0;
+    }
+    // Move in our pieces.
+    set(pieces[side], dst);
+    clr(pieces[side], src);
+
+    side = ~side;
+
+    // If king moves. ~side because we just changed
+    if (k_sq[~side] == src) {
+        k_sq[~side] = dst;
+        return;
+    }
+    // If pawn was moved, reset 50 move draw counter.
+    if (get(pawns_en, src))
+        half_clk = 0;
+
+    // Promotion
+    if (f & N_PROM) {
+        switch (f) {
+            case B_PROM: set(bishops, src); break;
+            case Q_PROM: set(bishops, src);
+            case R_PROM: set(rooks,   src); break;
+            default:;
+        }
+        clr(pawns_en, src);
+        return;
+    }
+    // Update Bitboards during regular move.
+    rooks       |= static_cast<Bitboard>(get(rooks, src)) << dst;
+    bishops     |= static_cast<Bitboard>(get(bishops, src)) << dst;
+    pawns_en    |= static_cast<Bitboard>(get(pawns_en, src)) << dst;
+
+    // Move from other Bitboards.
+    clr(rooks, src);
+    clr(bishops, src);
+    clr(pawns_en, src);
 }

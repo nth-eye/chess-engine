@@ -3,6 +3,7 @@
 
 #include "defs.h"
 #include "misc.h"
+#include "log.h"
 #include <array>
 
 struct BitIter {
@@ -11,7 +12,7 @@ struct BitIter {
 
     constexpr bool  operator!=(const BitIter &other) const  { return val != other.val; }
     constexpr void  operator++()                            { val &= val - 1; }
-    constexpr auto  operator*() const                       { return Square(lsb(val)); }
+    constexpr auto  operator*() const                       { return lsb(val); }
 
     constexpr BitIter begin()   { return val; }
     constexpr BitIter end()     { return 0; }
@@ -205,7 +206,7 @@ constexpr auto attacks()
 }
 
 template<Piece P>
-inline auto attacks_magic(const Bitboard *magic_nums)
+auto attacks_magic(const Bitboard *magic_nums)
 {
     static_assert(P == BISHOP || P == ROOK, "Only for bishop and rook");
 
@@ -223,6 +224,9 @@ inline auto attacks_magic(const Bitboard *magic_nums)
         magics[s].shift     = 64 - n_bits;
         magics[s].magic     = magic_nums[s];
         magics[s].attacks   = &table[offset];
+
+        // print_sq(s);
+        // LOG(":  shift = %d, n_bits = %d \n", magics[s].shift, n_bits);
 
         // Build square attacks table for every possible relevant occupancy.
         for (Bitboard idx = 0; idx < bit(n_bits); ++idx) {

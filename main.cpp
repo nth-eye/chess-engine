@@ -1,4 +1,5 @@
 #include <ctime>
+#include <chrono>
 #include "log.h"
 #include "board.h"
 
@@ -23,26 +24,21 @@ int main(int, char**)
     else 
         LOG("set_pos: failed \n");
 
-    MoveList moves = board.moves_pseudo();
+    // board.make_move(mv(B2, B4, PUSH));
+    // board.make_move(mv(C7, C5, PUSH));
+    // board.make_move(mv(B2, B4, PUSH));
+    // board.make_move(mv(B7, B5, PUSH));
+    // board.make_move(mv(A2, A4, PUSH));
+    // board.make_move(mv(A7, A5, PUSH));
 
-    print_moves(moves);
+    auto depth = 3;
 
-    // LOG("attacked: %d \n", board.attacked(E4, BLACK));
+    board.print();
+    LOG("\nStarting test to depth %d \n", depth);
 
-    // Square s        = A6;
-    // Bitboard block  = bit(E6) | bit(A3) | bit(G1);
+    auto start = std::chrono::steady_clock::now();
+    auto all_nodes = perft<true>(board, depth);
+    auto time = std::chrono::steady_clock::now() - start;
 
-    // print_bb(R_ATTACKS[s]);
-    // print_bb(block);
-    // print_bb(R_MAGICS[s][block]);
-
-    // Bitboard mask = attacks_mask<ROOK>(A1);
-
-    // for (int i = 0; i < 4095; ++i) {
-
-    //     auto occ = attacks_occupancy(i, mask);
-
-    //     print_bb(occ);
-    //     getchar();
-    // }
+    LOG("\nTest completed: %lu nodes visited in %f ms \n", all_nodes, time.count() / 1'000'000.0);
 }

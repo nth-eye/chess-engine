@@ -2,6 +2,7 @@
 #define BOARD_H
 
 #include "bitboard.h"
+#include "log.h"
 
 constexpr auto FEN_EMPTY    = "8/8/8/8/8/8/8/8 w - - 0 1";
 constexpr auto FEN_START    = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -18,24 +19,56 @@ struct Board {
     void clr_pos();
     bool set_pos(const char *fen);
     bool attacked(Square s, Color att_clr) const;
-    // size_t moves(Move *list, size_t max) const;
+    MoveList moves(/*Move *list, size_t max*/) const;
     MoveList moves_pseudo(/*Move *list, size_t max*/) const;
+    void make_move(Move move);
+    bool legal(Move move) const;
 
     Bitboard all() const        { return pieces[WHITE] | pieces[BLACK]; }
     Bitboard enpass() const     { return pawns_en &  SQ_ENPS; }
     Bitboard pawns() const      { return pawns_en & ~SQ_ENPS; }
-    Bitboard knights() const    { return all() & ~rooks & ~bishops & ~pawns_en & ~kings; }
+    Bitboard knights() const    { return all() & ~rooks & ~bishops & ~pawns_en & ~kings(); }
     Bitboard queens() const     { return rooks & bishops; }
+    Bitboard kings() const      { return bit(k_sq[WHITE]) | bit(k_sq[BLACK]); }
 private:
     Bitboard pieces[COLOR_num]  = {};
     Bitboard pawns_en           = 0;
     Bitboard bishops            = 0;
     Bitboard rooks              = 0;
-    Bitboard kings              = 0;
+    Square   k_sq[COLOR_num]    = {};
     Castle   castle             = CASTLE_NO;
     Color    side               = WHITE;
     uint8_t  half_clk           = 0;
     uint16_t full_clk           = 0;
 };
+
+template<bool Root>
+uint64_t perft(Board board, int depth) 
+{
+    Board tmp(board);
+
+    uint64_t cnt;
+    uint64_t nodes = 0;
+    bool leaf = (depth == 2);
+    auto legal_moves = board.moves();
+
+    for (auto move : legal_moves) {
+
+        if (Root && depth <= 1) {
+            cnt = 1;
+            ++nodes;
+        } else {
+            tmp.make_move(move);
+            cnt = leaf ? tmp.moves().size() : perft<false>(tmp, depth - 1);
+            nodes += cnt;
+            tmp = board;
+        }
+        if (Root) {
+            print_mv(move); 
+            LOG("\t %lu \n", cnt);
+        }
+    }
+    return nodes;
+}
 
 #endif // BOARD_H
