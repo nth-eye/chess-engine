@@ -9,10 +9,10 @@ using Bitboard  = uint64_t;
 using Move      = uint16_t;
 using MoveList  = std::vector<Move>;
 
-enum Color  : uint_fast8_t { WHITE, BLACK, COLOR_num };
 enum Piece  { EMPTY, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, PIECE_num };
 enum File   { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_num };
 enum Rank   { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_num };
+enum Color  : uint_fast8_t { WHITE, BLACK, COLOR_num };
 enum Square : uint_fast8_t {  
     A1, B1, C1, D1, E1, F1, G1, H1, 
     A2, B2, C2, D2, E2, F2, G2, H2, 

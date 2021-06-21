@@ -59,7 +59,7 @@ void Board::print() const
                 c = '.';
             else if (get(kings(), s))
                 c = 'k';
-            else if (get(pawns(), s))
+            else if (get(pawns, s))
                 c = 'p';
             else if (get(bishops, s))
                 c = get(rooks, s) ? 'q' : 'b';
@@ -82,7 +82,11 @@ void Board::print() const
     LOG("cast:  %c%c%c%c    \n", 
         castle & WKCA ? 'K' : '-', castle & WQCA ? 'Q' : '-', 
         castle & BKCA ? 'k' : '-', castle & BQCA ? 'q' : '-');
-    LOG("enps:  %c          \n", enpass() ? file_c(File(lsb(enpass()))) : '-');
+    LOG("enps:  ");
+    if (enps_sq)
+        print_sq(enps_sq);
+    else
+        LOG("- \n");
     LOG("half:  %u          \n", half_clk);
     LOG("full:  %u          \n", full_clk);
     LOG("side:  %c          \n", side_c(side));
@@ -112,7 +116,7 @@ bool Board::set_pos(const char *c)
         } else {
             switch (*c) {
                 case 'p':
-                case 'P': set(pawns_en, s); break;
+                case 'P': set(pawns, s);    break;
                 case 'n':
                 case 'N':                   break;
                 case 'b':
@@ -176,7 +180,7 @@ bool Board::set_pos(const char *c)
         {
             return false;
         }
-        set(pawns_en, sq(RANK_1, f));
+        enps_sq = sq(r, f);
         ++c;
     }
     ++c;
@@ -217,7 +221,7 @@ bool Board::attacked(Square s, Color att_clr) const
     if (R_ATTACKS[s][all()]     & they & rooks)
         return true;
     // Pawns
-    if (P_ATTACKS[!att_clr][s]  & they & pawns())
+    if (P_ATTACKS[~att_clr][s]  & they & pawns)
         return true;
     // Knights
     if (N_ATTACKS[s]            & they & knights())
@@ -265,7 +269,7 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
         return false;
     };
     // Pawn
-    for (auto src : BitIter(attacker & pawns())) {
+    for (auto src : BitIter(attacker & pawns)) {
 
         Direction dir   = side == WHITE ? NORTH : SOUTH;
         Square dst      = src + dir;
@@ -299,14 +303,8 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
             }
         }
         // enPassant
-        if (enpass()) {
-            File enps_f     = File(lsb(enpass()));
-            Rank enps_r     = Rank(RANK_8 - push);
-            Square enps     = sq(enps_r, enps_f);
-
-            if (bit(enps) & P_ATTACKS[side][src])
-                save_f(src, enps, ENPASS);
-        }
+        if (bit(enps_sq) & P_ATTACKS[side][src])
+            save_f(src, enps_sq, ENPASS);
     }
     // Knight
     for (auto src : BitIter(attacker & knights())) {
@@ -381,7 +379,7 @@ void Board::make_move(Move move)
     // Remove en passant square, update castling rules and clocks
     ++half_clk;
     ++full_clk;
-    pawns_en    &= ~SQ_ENPS;
+    enps_sq     = A1;
     castle      &= CASTLE_PERM_FROM[src];
     castle      &= CASTLE_PERM_TO[dst];
 
@@ -409,20 +407,20 @@ void Board::make_move(Move move)
                 do_castle(A8, D8);
             break;
         case PUSH:
-            set(pawns_en, sq(RANK_1, file(dst)));
+            enps_sq = side == WHITE ? dst + SOUTH : dst + NORTH; 
             break;
         case ENPASS:
-            auto trg = (side == WHITE) ? dst + SOUTH : dst + NORTH;
-            clr(pawns_en,       trg);
+            auto trg = side == WHITE ? dst + SOUTH : dst + NORTH;
+            clr(pawns,          trg);
             clr(pieces[~side],  trg);
             break;
     }
     // Remove captured piece.
     if (get(pieces[~side], dst)) {
         clr(pieces[~side], dst);
-        clr(rooks, dst);
-        clr(bishops, dst);
-        clr(pawns_en, dst);
+        clr(pawns,      dst);
+        clr(rooks,      dst);
+        clr(bishops,    dst);
         half_clk = 0;
     }
     // Move in our pieces.
@@ -437,7 +435,7 @@ void Board::make_move(Move move)
         return;
     }
     // Reset 50 move counter if pawn was moved
-    if (get(pawns_en, src))
+    if (get(pawns, src))
         half_clk = 0;
 
     // Promotion
@@ -448,16 +446,16 @@ void Board::make_move(Move move)
             case R_PROM: set(rooks,   src); break;
             default:;
         }
-        clr(pawns_en, src);
+        clr(pawns, src);
         return;
     }
     // Update Bitboards during regular move
-    rooks       |= static_cast<Bitboard>(get(rooks, src)) << dst;
-    bishops     |= static_cast<Bitboard>(get(bishops, src)) << dst;
-    pawns_en    |= static_cast<Bitboard>(get(pawns_en, src)) << dst;
+    pawns   |= static_cast<Bitboard>(get(pawns,     src)) << dst;
+    rooks   |= static_cast<Bitboard>(get(rooks,     src)) << dst;
+    bishops |= static_cast<Bitboard>(get(bishops,   src)) << dst;
 
     // Remove from other Bitboards
-    clr(rooks, src);
-    clr(bishops, src);
-    clr(pawns_en, src);
+    clr(pawns,      src);
+    clr(rooks,      src);
+    clr(bishops,    src);
 }

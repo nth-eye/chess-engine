@@ -25,28 +25,26 @@ struct Board {
     void make_move(Move move);
 
     Bitboard all() const        { return pieces[WHITE] | pieces[BLACK]; }
-    Bitboard enpass() const     { return pawns_en &  SQ_ENPS; }
-    Bitboard pawns() const      { return pawns_en & ~SQ_ENPS; }
-    Bitboard knights() const    { return all() & ~rooks & ~bishops & ~pawns() & ~kings(); }
+    Bitboard knights() const    { return all() & ~rooks & ~bishops & ~pawns & ~kings(); }
     Bitboard queens() const     { return rooks & bishops; }
     Bitboard kings() const      { return bit(k_sq[WHITE]) | bit(k_sq[BLACK]); }
-// private:
+private:
     Bitboard pieces[COLOR_num]  = {};
-    Bitboard pawns_en           = 0;
+    Bitboard pawns              = 0;
     Bitboard bishops            = 0;
     Bitboard rooks              = 0;
     Square   k_sq[COLOR_num]    = {};
-    Square   enps_sq            = SQ_num;
+    Square   enps_sq            = A1;
     Castle   castle             = CASTLE_NO;
     Color    side               = WHITE;
     uint8_t  half_clk           = 0;
     uint16_t full_clk           = 0;
 };
 
-template<bool Root>
+template<bool Root = true>
 uint64_t perft(Board board, int depth) 
 {
-    Board tmp(board);
+    Board tmp = board;
 
     uint64_t cnt;
     uint64_t nodes      = 0;

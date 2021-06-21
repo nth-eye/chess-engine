@@ -24,11 +24,8 @@ int main(int, char**)
     else 
         LOG("set_pos: failed \n");
 
-    // board.make_move(mv(A2, A3));
-
-    auto depth = 8;
-
-    board.print();
+    auto depth = 5;
+    
     LOG("\nStarting test to depth %d \n", depth);
 
     auto start = std::chrono::steady_clock::now();
@@ -36,4 +33,6 @@ int main(int, char**)
     auto time = std::chrono::steady_clock::now() - start;
 
     LOG("\nTest completed: %lu nodes visited in %f ms \n", all_nodes, time.count() / 1'000'000.0);
+
+    // printf("test:   %lu clock_t \n", measure_time<10000>(perft, board, depth));
 }
