@@ -24,15 +24,15 @@ int main(int, char**)
     else 
         LOG("set_pos: failed \n");
 
-    auto depth = 5;
-    
-    LOG("\nStarting test to depth %d \n", depth);
+    auto depth = 3;
 
-    auto start = std::chrono::steady_clock::now();
-    auto all_nodes = perft<true>(board, depth);
-    auto time = std::chrono::steady_clock::now() - start;
+    // LOG("\nStarting test to depth %d \n", depth);
 
-    LOG("\nTest completed: %lu nodes visited in %f ms \n", all_nodes, time.count() / 1'000'000.0);
+    // auto start = std::chrono::steady_clock::now();
+    // auto all_nodes = perft<true>(board, depth);
+    // auto time = std::chrono::steady_clock::now() - start;
 
-    // printf("test:   %lu clock_t \n", measure_time<10000>(perft, board, depth));
+    // LOG("\nTest completed: %lu nodes visited in %f ms \n", all_nodes, time.count() / 1'000'000.0);
+
+    printf("test:   %lu clock_t \n", measure_time<10000>(perft, board, depth));
 }

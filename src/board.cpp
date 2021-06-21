@@ -242,11 +242,7 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
     MoveList list;
     list.reserve(100);
 
-    auto save = [&] (Square src, Square dst) 
-    {
-        list.push_back(mv(src, dst));
-    };
-    auto save_f = [&] (Square src, Square dst, MoveFlag flag) 
+    auto save = [&] (Square src, Square dst, MoveFlag flag) 
     {
         list.push_back(mv(src, dst, flag));
     };
@@ -280,14 +276,14 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
 
             if (rank(dst) != prom) {
                 // Quiet
-                save_f(src, dst, QUIET);
+                save(src, dst, QUIET);
                 // Double push
                 if (rank(dst) == push && !get(both, dst + dir))
-                    save_f(src, dst + dir, PUSH);
+                    save(src, dst + dir, PUSH);
             } else {
                 // Promotions
                 for (auto type : PROMOTIONS)
-                    save_f(src, dst, type);
+                    save(src, dst, type);
             }
         }
         // Captures
@@ -297,14 +293,14 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
             if (rank(dst) == prom) {
                 // Promotions with capture
                 for (auto type : PROMOTIONS)
-                    save_f(src, dst, type);
+                    save(src, dst, type);
             } else {
-                save(src, dst);
+                save(src, dst, QUIET);
             }
         }
         // enPassant
         if (bit(enps_sq) & P_ATTACKS[side][src])
-            save_f(src, enps_sq, ENPASS);
+            save(src, enps_sq, ENPASS);
     }
     // Knight
     for (auto src : BitIter(attacker & knights())) {
@@ -312,7 +308,7 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
         Bitboard attacked = N_ATTACKS[src]       & ~attacker;
 
         for (auto dst : BitIter(attacked))
-            save(src, dst);
+            save(src, dst, QUIET);
     }
     // Bishop / queen
     for (auto src : BitIter(attacker & bishops)) {
@@ -320,7 +316,7 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
         Bitboard attacked = B_ATTACKS[src][both] & ~attacker;
 
         for (auto dst : BitIter(attacked))
-            save(src, dst);
+            save(src, dst, QUIET);
     }
     // Rook / queen
     for (auto src : BitIter(attacker & rooks)) {
@@ -328,25 +324,25 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
         Bitboard attacked = R_ATTACKS[src][both] & ~attacker;
 
         for (auto dst : BitIter(attacked))
-            save(src, dst);
+            save(src, dst, QUIET);
     }
     // King
     Bitboard attacked = K_ATTACKS[king] & ~attacker;
 
     for (const auto dst : BitIter(attacked)) 
-        save(king, dst);
+        save(king, dst, QUIET);
 
     auto ca_rights = castle >> (2 * side); 
 
     if (ca_rights & WKCA) {
         auto rook = CASTLE_SQ[side][0];
         if (path_free(king + EAST, rook) && !path_attacked(king, king + Direction(EAST * 2)))
-            save_f(king, king + Direction(EAST * 2), K_CAST);
+            save(king, king + Direction(EAST * 2), K_CAST);
     }
     if (ca_rights & WQCA) {
         auto rook = CASTLE_SQ[side][1];
         if (path_free(rook + EAST, king) && !path_attacked(king + WEST, king + EAST))
-            save_f(king, king + Direction(WEST * 2), Q_CAST);
+            save(king, king + Direction(WEST * 2), Q_CAST);
     }
     return list;
 }
@@ -395,16 +391,10 @@ void Board::make_move(Move move)
         default:
             break;
         case K_CAST:
-            if (side == WHITE)
-                do_castle(H1, F1);
-            else
-                do_castle(H8, F8);
+            side == WHITE ? do_castle(H1, F1) : do_castle(H8, F8);
             break;
         case Q_CAST:
-            if (side == WHITE)
-                do_castle(A1, D1);
-            else
-                do_castle(A8, D8);
+            side == WHITE ? do_castle(A1, D1) : do_castle(A8, D8);
             break;
         case PUSH:
             enps_sq = side == WHITE ? dst + SOUTH : dst + NORTH; 
