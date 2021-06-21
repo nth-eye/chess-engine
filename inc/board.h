@@ -18,24 +18,25 @@ struct Board {
     void print() const;
     void clr_pos();
     bool set_pos(const char *fen);
+    bool legal(Move move) const;
     bool attacked(Square s, Color att_clr) const;
     MoveList moves(/*Move *list, size_t max*/) const;
     MoveList moves_pseudo(/*Move *list, size_t max*/) const;
     void make_move(Move move);
-    bool legal(Move move) const;
 
     Bitboard all() const        { return pieces[WHITE] | pieces[BLACK]; }
     Bitboard enpass() const     { return pawns_en &  SQ_ENPS; }
     Bitboard pawns() const      { return pawns_en & ~SQ_ENPS; }
-    Bitboard knights() const    { return all() & ~rooks & ~bishops & ~pawns_en & ~kings(); }
+    Bitboard knights() const    { return all() & ~rooks & ~bishops & ~pawns() & ~kings(); }
     Bitboard queens() const     { return rooks & bishops; }
     Bitboard kings() const      { return bit(k_sq[WHITE]) | bit(k_sq[BLACK]); }
-private:
+// private:
     Bitboard pieces[COLOR_num]  = {};
     Bitboard pawns_en           = 0;
     Bitboard bishops            = 0;
     Bitboard rooks              = 0;
     Square   k_sq[COLOR_num]    = {};
+    Square   enps_sq            = SQ_num;
     Castle   castle             = CASTLE_NO;
     Color    side               = WHITE;
     uint8_t  half_clk           = 0;
@@ -48,9 +49,9 @@ uint64_t perft(Board board, int depth)
     Board tmp(board);
 
     uint64_t cnt;
-    uint64_t nodes = 0;
-    bool leaf = (depth == 2);
-    auto legal_moves = board.moves();
+    uint64_t nodes      = 0;
+    bool leaf           = (depth == 2);
+    auto legal_moves    = board.moves();
 
     for (auto move : legal_moves) {
 

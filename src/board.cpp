@@ -6,11 +6,11 @@
 
 constexpr Square CASTLE_SQ[][2] = { { H1, A1 }, { H8, A8 } };
 constexpr MoveFlag PROMOTIONS[] = { N_PROM, B_PROM, R_PROM, Q_PROM };
-constexpr auto P_ATTACKS = attacks_pawn();
-constexpr auto N_ATTACKS = attacks<KNIGHT>();
-constexpr auto K_ATTACKS = attacks<KING>();
-const auto B_ATTACKS = attacks_magic<BISHOP>(B_MAGIC_NUM);
-const auto R_ATTACKS = attacks_magic<ROOK>(R_MAGIC_NUM);
+constexpr auto P_ATTACKS    = attacks_pawn();
+constexpr auto N_ATTACKS    = attacks<KNIGHT>();
+constexpr auto K_ATTACKS    = attacks<KING  >();
+const auto B_ATTACKS        = attacks_magic<BISHOP>(B_MAGIC_NUM);
+const auto R_ATTACKS        = attacks_magic<ROOK  >(R_MAGIC_NUM);
 
 constexpr int CASTLE_PERM_FROM[64] = {
     0xD, 0xF, 0xF, 0xF, 0xC, 0xF, 0xF, 0xE,
@@ -369,7 +369,7 @@ bool Board::legal(Move move) const
 {
     Board board = *this;
     board.make_move(move);
-    return !board.attacked(k_sq[side], ~side);
+    return !board.attacked(board.k_sq[side], ~side);
 }
 
 void Board::make_move(Move move) 
@@ -431,12 +431,12 @@ void Board::make_move(Move move)
 
     side = ~side;
 
-    // If king moves. ~side because we just changed
+    // If king moves (~side because we just changed it)
     if (k_sq[~side] == src) {
         k_sq[~side] = dst;
         return;
     }
-    // If pawn was moved, reset 50 move draw counter.
+    // Reset 50 move counter if pawn was moved
     if (get(pawns_en, src))
         half_clk = 0;
 
@@ -451,12 +451,12 @@ void Board::make_move(Move move)
         clr(pawns_en, src);
         return;
     }
-    // Update Bitboards during regular move.
+    // Update Bitboards during regular move
     rooks       |= static_cast<Bitboard>(get(rooks, src)) << dst;
     bishops     |= static_cast<Bitboard>(get(bishops, src)) << dst;
     pawns_en    |= static_cast<Bitboard>(get(pawns_en, src)) << dst;
 
-    // Move from other Bitboards.
+    // Remove from other Bitboards
     clr(rooks, src);
     clr(bishops, src);
     clr(pawns_en, src);

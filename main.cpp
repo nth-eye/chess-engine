@@ -19,19 +19,14 @@ int main(int, char**)
 {
     Board board;
 
-    if (board.set_pos(FEN_START)) // "8/8/8/3p4/4P3/8/8/8 w - - 0 1"
+    if (board.set_pos(FEN_START))
         board.print();
     else 
         LOG("set_pos: failed \n");
 
-    // board.make_move(mv(B2, B4, PUSH));
-    // board.make_move(mv(C7, C5, PUSH));
-    // board.make_move(mv(B2, B4, PUSH));
-    // board.make_move(mv(B7, B5, PUSH));
-    // board.make_move(mv(A2, A4, PUSH));
-    // board.make_move(mv(A7, A5, PUSH));
+    // board.make_move(mv(A2, A3));
 
-    auto depth = 3;
+    auto depth = 8;
 
     board.print();
     LOG("\nStarting test to depth %d \n", depth);
