@@ -3,7 +3,6 @@
 
 #include "defs.h"
 #include "misc.h"
-#include "log.h"
 #include <array>
 
 struct BitIter {
@@ -224,9 +223,6 @@ auto attacks_magic(const Bitboard *magic_nums)
         magics[s].shift     = 64 - n_bits;
         magics[s].magic     = magic_nums[s];
         magics[s].attacks   = &table[offset];
-
-        // print_sq(s);
-        // LOG(":  shift = %d, n_bits = %d \n", magics[s].shift, n_bits);
 
         // Build square attacks table for every possible relevant occupancy.
         for (Bitboard idx = 0; idx < bit(n_bits); ++idx) {

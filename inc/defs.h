@@ -7,7 +7,7 @@
 
 using Bitboard  = uint64_t;
 using Move      = uint16_t;
-using MoveList  = std::vector<Move>;
+using Score     = int;
 
 enum Piece  { EMPTY, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, PIECE_num };
 enum File   { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_num };

@@ -1,8 +1,7 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include "defs.h"
-#include "misc.h"
+#include "board.h"
 #include <cstdio>
 
 #define LOG     printf
@@ -52,7 +51,7 @@ constexpr void print_mv(Move m)
     }
 }
 
-inline void print_moves(const MoveList &list) 
+constexpr void print_moves(const MoveList &list) 
 {
     // constexpr const char *bit_rep[16] = {
     //     "0000", "0001", "0010", "0011",
@@ -68,6 +67,43 @@ inline void print_moves(const MoveList &list)
         print_mv(move);
     }
     LOGC('\n');
+}
+
+template<bool Root = true>
+uint64_t perft(Board board, int depth) 
+{
+    Board tmp           = board;
+    uint64_t nodes      = 0;
+    uint64_t cnt;
+
+    MoveList list;
+
+    board.moves(list);
+
+    for (auto move : list) {
+
+        if (Root && depth <= 1) {
+            cnt = 1;
+            ++nodes;
+        } else {
+            tmp.make_move(move);
+
+            if (depth == 2) {
+                MoveList leaf_moves;
+                tmp.moves(leaf_moves);
+                cnt = leaf_moves.size();
+            } else {
+                cnt = perft<false>(tmp, depth - 1);
+            }
+            nodes += cnt;
+            tmp = board;
+        }
+        if (Root) {
+            print_mv(move); 
+            LOG("\t %lu \n", cnt);
+        }
+    }
+    return nodes;
 }
 
 #endif // LOG_H

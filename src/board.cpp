@@ -233,19 +233,12 @@ bool Board::attacked(Square s, Color att_clr) const
     return false;
 }
 
-MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
+void Board::moves_pseudo(MoveList &list) const
 {
     Bitboard attacker = pieces[side];
     Bitboard both     = all();
     Square king       = k_sq[side];
 
-    MoveList list;
-    list.reserve(100);
-
-    auto save = [&] (Square src, Square dst, MoveFlag flag) 
-    {
-        list.push_back(mv(src, dst, flag));
-    };
     auto path_free = [&] (Square src, Square dst) 
     {
         while (src != dst) {
@@ -276,14 +269,14 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
 
             if (rank(dst) != prom) {
                 // Quiet
-                save(src, dst, QUIET);
+                list.save(src, dst);
                 // Double push
                 if (rank(dst) == push && !get(both, dst + dir))
-                    save(src, dst + dir, PUSH);
+                    list.save(src, dst + dir, PUSH);
             } else {
                 // Promotions
                 for (auto type : PROMOTIONS)
-                    save(src, dst, type);
+                    list.save(src, dst, type);
             }
         }
         // Captures
@@ -293,14 +286,14 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
             if (rank(dst) == prom) {
                 // Promotions with capture
                 for (auto type : PROMOTIONS)
-                    save(src, dst, type);
+                    list.save(src, dst, type);
             } else {
-                save(src, dst, QUIET);
+                list.save(src, dst);
             }
         }
         // enPassant
         if (bit(enps_sq) & P_ATTACKS[side][src])
-            save(src, enps_sq, ENPASS);
+            list.save(src, enps_sq, ENPASS);
     }
     // Knight
     for (auto src : BitIter(attacker & knights())) {
@@ -308,7 +301,7 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
         Bitboard attacked = N_ATTACKS[src]       & ~attacker;
 
         for (auto dst : BitIter(attacked))
-            save(src, dst, QUIET);
+            list.save(src, dst);
     }
     // Bishop / queen
     for (auto src : BitIter(attacker & bishops)) {
@@ -316,7 +309,7 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
         Bitboard attacked = B_ATTACKS[src][both] & ~attacker;
 
         for (auto dst : BitIter(attacked))
-            save(src, dst, QUIET);
+            list.save(src, dst);
     }
     // Rook / queen
     for (auto src : BitIter(attacker & rooks)) {
@@ -324,39 +317,36 @@ MoveList Board::moves_pseudo(/*Move *list, size_t max*/) const
         Bitboard attacked = R_ATTACKS[src][both] & ~attacker;
 
         for (auto dst : BitIter(attacked))
-            save(src, dst, QUIET);
+            list.save(src, dst);
     }
     // King
     Bitboard attacked = K_ATTACKS[king] & ~attacker;
 
     for (const auto dst : BitIter(attacked)) 
-        save(king, dst, QUIET);
+        list.save(king, dst);
 
     auto ca_rights = castle >> (2 * side); 
 
     if (ca_rights & WKCA) {
         auto rook = CASTLE_SQ[side][0];
-        if (path_free(king + EAST, rook) && !path_attacked(king, king + Direction(EAST * 2)))
-            save(king, king + Direction(EAST * 2), K_CAST);
+        if (path_free(king + EAST, rook) && !path_attacked(king, king + EAST + EAST))
+            list.save(king, king + EAST + EAST, K_CAST);
     }
     if (ca_rights & WQCA) {
         auto rook = CASTLE_SQ[side][1];
         if (path_free(rook + EAST, king) && !path_attacked(king + WEST, king + EAST))
-            save(king, king + Direction(WEST * 2), Q_CAST);
+            list.save(king, king + WEST + WEST, Q_CAST);
     }
-    return list;
 }
 
-MoveList Board::moves(/*Move *list, size_t max*/) const
+void Board::moves(MoveList &list) const
 {
-    MoveList list = moves_pseudo();
-    list.erase(
-        std::remove_if(	
-            list.begin(), 
-            list.end(), 
-            [&](Move m) { return !legal(m); }), 
-        list.end());
-    return list;
+    moves_pseudo(list);
+
+    Move *i = list.begin();
+
+    while (i != list.end())
+        legal(*i) ? void(++i) : list.erase(i);
 }
 
 bool Board::legal(Move move) const 
@@ -371,7 +361,6 @@ void Board::make_move(Move move)
     const auto src  = from(move);
     const auto dst  = to(move);
     const auto f    = flag(move);
-
     // Remove en passant square, update castling rules and clocks
     ++half_clk;
     ++full_clk;
@@ -418,7 +407,6 @@ void Board::make_move(Move move)
     clr(pieces[side], src);
 
     side = ~side;
-
     // If king moves (~side because we just changed it)
     if (k_sq[~side] == src) {
         k_sq[~side] = dst;
@@ -427,7 +415,6 @@ void Board::make_move(Move move)
     // Reset 50 move counter if pawn was moved
     if (get(pawns, src))
         half_clk = 0;
-
     // Promotion
     if (f & N_PROM) {
         switch (f) {
@@ -443,7 +430,6 @@ void Board::make_move(Move move)
     pawns   |= static_cast<Bitboard>(get(pawns,     src)) << dst;
     rooks   |= static_cast<Bitboard>(get(rooks,     src)) << dst;
     bishops |= static_cast<Bitboard>(get(bishops,   src)) << dst;
-
     // Remove from other Bitboards
     clr(pawns,      src);
     clr(rooks,      src);
