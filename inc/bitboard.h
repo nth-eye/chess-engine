@@ -250,12 +250,13 @@ constexpr auto betweens()
             if (same_line(src, dst)) {
                 bb[src][dst] =  attacks_sliding<ROOK>(src, bit(dst)) & 
                                 attacks_sliding<ROOK>(dst, bit(src));
+                // set(bb[src][dst], dst);
             } else 
             if (same_diag(src, dst)) {
                 bb[src][dst] =  attacks_sliding<BISHOP>(src, bit(dst)) & 
                                 attacks_sliding<BISHOP>(dst, bit(src));
+                // set(bb[src][dst], dst);
             }
-            // set(bb[src][dst], dst);
         }
     }
     return bb;

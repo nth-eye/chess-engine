@@ -153,7 +153,9 @@ bool Board::set_pos(const char *c)
 
     constexpr const char *castle_str = "KQkq";
 
-    if (*c != '-') {
+    if (*c == '-' && *(c + 1) == ' ') {
+        ++c;
+    } else {
         for (int i = 0; i < 4; ++i, ++c) {
             if (*c != castle_str[i] &&
                 *c != '-') 
@@ -163,8 +165,6 @@ bool Board::set_pos(const char *c)
             if (*c != '-')
                 castle |= 1 << i;
         }
-    } else {
-        ++c;
     }
     if (*c++ != ' ')
         return false;
@@ -338,7 +338,7 @@ void Board::moves_legal(MoveList &list) const
     Direction dir   = side == WHITE ? NORTH : SOUTH;
     Rank prom_src_r = side == WHITE ? RANK_7 : RANK_2;
     Rank prom_dst_r = side == WHITE ? RANK_8 : RANK_1; //Rank((7 + side) & 7);
-    Rank push_r     = side == WHITE ? RANK_3 : RANK_6; //Rank(2 + side * 3);
+    Rank push_r     = side == WHITE ? RANK_2 : RANK_7; //Rank(2 + side * 3);
 
     auto path_free = [&] (Square src, Square dst) 
     {
@@ -359,23 +359,9 @@ void Board::moves_legal(MoveList &list) const
         return false;
     };
 
-    // LOG("us: \n"); 
-    // print_bb(us);
-    // LOG("they: \n"); 
-    // print_bb(they);
-    // LOG("both: \n"); 
-    // print_bb(both);
-    // LOG("king_bb: \n"); 
-    // print_bb(king_bb);
-
-    // Bitboard dang = danger();
-
-    // LOG("danger: \n"); 
-    // print_bb(dang);
-
     Bitboard to_go = K_ATTACKS[king] & ~(us | danger());
 
-    // LOG("king to_go: \n"); 
+    // LOG("to_go \n");
     // print_bb(to_go);
 
     for (const auto dst : BitIter(to_go)) 
@@ -386,8 +372,8 @@ void Board::moves_legal(MoveList &list) const
         (P_ATTACKS[side][king]  & they & pawns)     |
         (B_ATTACKS[king][both]  & they & bishops)   |
         (R_ATTACKS[king][both]  & they & rooks);
-
-    // LOG("checkers: \n"); 
+    
+    // LOG("checkers \n");
     // print_bb(checkers);
 
     Bitboard pinned     = 0;
@@ -395,7 +381,7 @@ void Board::moves_legal(MoveList &list) const
         (B_ATTACKS[king][they]  & they & bishops) |
         (R_ATTACKS[king][they]  & they & rooks);
 
-    // LOG("pinners: \n"); 
+    // LOG("pinners \n");
     // print_bb(pinners);
 
     Bitboard capture_mask; //   = 0xffffffffffffffff;
@@ -432,12 +418,15 @@ void Board::moves_legal(MoveList &list) const
                     pinned |= pin;
             }
 
-            // LOG("pinned: \n"); 
-            // print_bb(pinned);
-
             Bitboard pinned_bishops = pinned & bishops;
             Bitboard pinned_rooks   = pinned & rooks;
             Bitboard pinned_pawns   = pinned & pawns;
+
+            // LOG("pawns \n");
+            // print_bb(pawns);
+
+            // LOG("pinned_pawns \n");
+            // print_bb(pinned_pawns);
 
             for (auto src : BitIter(pinned_bishops)) {
 
@@ -448,10 +437,7 @@ void Board::moves_legal(MoveList &list) const
             }
             for (auto src : BitIter(pinned_rooks)) {
 
-                Bitboard bb = R_ATTACKS[src][both] & LINE_BB[king][src] & legal_mask;
-
-                LOG("pinned_rooks dst bb: \n"); 
-                print_bb(bb);
+                Bitboard bb = R_ATTACKS[src][both] & legal_mask & LINE_BB[king][src];
 
                 for (auto dst : BitIter(bb))
                     list.save(src, dst);
@@ -460,25 +446,25 @@ void Board::moves_legal(MoveList &list) const
 
                 if (rank(src) == prom_src_r) {
 
-                    Bitboard bb = P_ATTACKS[side][src] & LINE_BB[king][src] & capture_mask;
+                    Bitboard bb = P_ATTACKS[side][src] & capture_mask & LINE_BB[king][src];
 
                     for (auto dst : BitIter(bb))
                         for (auto type : PROMOTIONS)
                             list.save(src, dst, type);
                 } else {
-                    Bitboard bb = P_ATTACKS[side][src] & LINE_BB[king][src] & they;
+                    Bitboard bb = P_ATTACKS[side][src] & capture_mask & LINE_BB[king][src];
 
                     for (auto dst : BitIter(bb))
                         list.save(src, dst);
 
-                    bb = bit(src + dir) & LINE_BB[king][src] & ~both;
+                    bb = bit(src + dir) & quiet_mask & LINE_BB[king][src];
 
                     for (auto dst : BitIter(bb))
                         list.save(src, dst);
 
-                    if (rank(src) == push_r) {
+                    if (rank(src) == push_r && !get(both, src + dir)) {
 
-                        bb = bit(src + dir + dir) & LINE_BB[king][src] & ~both;
+                        bb = bit(src + dir + dir) & quiet_mask & LINE_BB[king][src];
 
                         for (auto dst : BitIter(bb))
                             list.save(src, dst);
@@ -500,52 +486,87 @@ void Board::moves_legal(MoveList &list) const
                 quiet_mask = 0;
             
             legal_mask = capture_mask | quiet_mask;
+
+            // LOG("capture_mask \n");
+            // print_bb(capture_mask);
+            // LOG("quiet_mask \n");
+            // print_bb(quiet_mask);
+            // LOG("legal_mask \n");
+            // print_bb(legal_mask);
         }
         break;
 
         default: return;
     }
-    // LOG("capture_mask: \n"); 
-    // print_bb(capture_mask);
-    // LOG("quiet_mask: \n"); 
-    // print_bb(quiet_mask);
-
     Bitboard not_pinned = ~pinned;
+
+    // LOG("not_pinned \n");
+    // print_bb(not_pinned);
+
+    // LOG("suka \n");
+    // print_bb(us & not_pinned & pawns);
 
     // Pawn
     for (auto src : BitIter(us & not_pinned & pawns)) {
 
-        Square dst = src + dir;
+        if (rank(src) == prom_src_r) {
+
+            Bitboard bb = P_ATTACKS[side][src] & legal_mask;
+
+            for (auto dst : BitIter(bb))
+                for (auto type : PROMOTIONS)
+                    list.save(src, dst, type);
+        } else {
+            Bitboard bb = P_ATTACKS[side][src] & capture_mask;
+
+            for (auto dst : BitIter(bb))
+                list.save(src, dst);
+
+            bb = bit(src + dir) & quiet_mask;
+
+            for (auto dst : BitIter(bb))
+                list.save(src, dst);
+
+            if (rank(src) == push_r && !get(both, src + dir)) {
+
+                bb = bit(src + dir + dir) & quiet_mask;
+
+                for (auto dst : BitIter(bb))
+                    list.save(src, dst);
+            }
+        }
+
+        // Square dst = src + dir;
         
-        if (!get(both, dst)) {
+        // if (!get(both, dst)) {
 
-            if (rank(dst) != prom_dst_r) {
-                // Quiet
-                list.save(src, dst);
-                // Double push
-                if (rank(dst) == push_r && !get(both, dst + dir))
-                    list.save(src, dst + dir, PUSH);
-            } else {
-                // Promotions
-                for (auto type : PROMOTIONS)
-                    list.save(src, dst, type);
-            }
-        }
-        // Captures
-        Bitboard to_go = P_ATTACKS[side][src] & legal_mask;
+        //     if (rank(dst) != prom_dst_r) {
+        //         // Quiet
+        //         list.save(src, dst);
+        //         // Double push
+        //         if (rank(dst) == push_r && !get(both, dst + dir))
+        //             list.save(src, dst + dir, PUSH);
+        //     } else {
+        //         // Promotions
+        //         for (auto type : PROMOTIONS)
+        //             list.save(src, dst, type);
+        //     }
+        // }
+        // // Captures
+        // Bitboard to_go = P_ATTACKS[side][src] & capture_mask;
 
-        for (auto dst : BitIter(to_go)) {
-            if (rank(dst) == prom_dst_r) {
-                // Promotions with capture
-                for (auto type : PROMOTIONS)
-                    list.save(src, dst, type);
-            } else {
-                list.save(src, dst);
-            }
-        }
-        // enPassant
-        if (bit(enps_sq) & P_ATTACKS[side][src])
-            list.save(src, enps_sq, ENPASS);
+        // for (auto dst : BitIter(to_go)) {
+        //     if (rank(dst) == prom_dst_r) {
+        //         // Promotions with capture
+        //         for (auto type : PROMOTIONS)
+        //             list.save(src, dst, type);
+        //     } else {
+        //         list.save(src, dst);
+        //     }
+        // }
+        // // enPassant
+        // if (bit(enps_sq) & P_ATTACKS[side][src])
+        //     list.save(src, enps_sq, ENPASS);
     }
     // Knight
     for (auto src : BitIter(us & not_pinned & knights())) {
@@ -601,6 +622,10 @@ Bitboard Board::danger() const
 
 void Board::moves(MoveList &list) const
 {
+    // side == WHITE ? 
+    //     moves_legal<WHITE>(list) : 
+    //     moves_legal<BLACK>(list);
+
     moves_legal(list);
 
     // Move *i = list.begin();
