@@ -240,24 +240,49 @@ auto attacks_magic(const Bitboard *magic_nums)
     return magics;
 }
 
-constexpr auto squares_between()
+constexpr auto betweens()
 {
     std::array<Bitboard[SQ_num], SQ_num> bb = {};
 
     for (Square src = A1; src <= H8; ++src) {
         for (Square dst = A1; dst <= H8; ++dst) {
-            if (rank(src) == rank(dst) || 
-                file(src) == file(dst))
-            {
+
+            if (same_line(src, dst)) {
                 bb[src][dst] =  attacks_sliding<ROOK>(src, bit(dst)) & 
                                 attacks_sliding<ROOK>(dst, bit(src));
-            } else {
+            } else 
+            if (same_diag(src, dst)) {
                 bb[src][dst] =  attacks_sliding<BISHOP>(src, bit(dst)) & 
                                 attacks_sliding<BISHOP>(dst, bit(src));
             }
             // set(bb[src][dst], dst);
         }
     }
+    return bb;
+}
+
+constexpr auto lines()
+{
+    std::array<Bitboard[SQ_num], SQ_num> bb = {};
+
+    for (Square src = A1; src <= H8; ++src) {
+        for (Square dst = A1; dst <= H8; ++dst) {
+
+            if (same_line(src, dst)) {
+                bb[src][dst] =  attacks_sliding<ROOK>(src, 0) & 
+                                attacks_sliding<ROOK>(dst, 0);
+                set(bb[src][dst], src);
+                set(bb[src][dst], dst);
+            } else 
+            if (same_diag(src, dst)) {
+                bb[src][dst] =  attacks_sliding<BISHOP>(src, 0) & 
+                                attacks_sliding<BISHOP>(dst, 0);
+                set(bb[src][dst], src);
+                set(bb[src][dst], dst);
+            }
+        }
+    }
+
     return bb;
 }
 

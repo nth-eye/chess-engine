@@ -54,6 +54,15 @@ constexpr int cnt(Bitboard bb)
 constexpr Square lsb(Bitboard bb)           { return Square(cnt((bb & -bb) - 1));  }
 constexpr Color operator~(Color c)          { return Color(c ^ BLACK); }
 
+constexpr bool same_line(Square s1, Square s2)
+{
+    return rank(s1) == rank(s2) || file(s1) == file(s2);
+}
+constexpr bool same_diag(Square s1, Square s2)
+{
+    return rank(s1) - file(s1) == rank(s2) - file(s2);
+}
+
 constexpr char file_c(File f)               { return 'a' + f; }
 constexpr char rank_c(Rank r)               { return '1' + r; }
 constexpr char side_c(Color c)              { return c == WHITE ? 'w' : 'b'; }
