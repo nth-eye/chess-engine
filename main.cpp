@@ -35,6 +35,11 @@ int main(int, char**)
     // "rn1qkbnr/p3ppp1/1ppp2Qp/3B4/6b1/2P4P/PP1PPP2/RNB1K1NR b KQkq - 0 1"
     // "r4br1/8/2Q2npp/Pkn1p3/8/2PPP1qP/4bP2/RNB1KB2 b -Q-- - 0 1"
     // "8/8/6b1/k3p2N/8/b1PB4/K6p/8 b - - 0 1"
+    // "8/8/8/2k5/2pP4/8/B7/4K3 b - d3 0 3"
+
+    // TODO 
+    // "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8" , { 3: 62379 }
+    // "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10" , { 3: 89890 }
 
     Board board;
 
@@ -57,11 +62,13 @@ int main(int, char**)
     //     tmp.print();
     // }
 
-    // printf("%d \n", same_diag(E8, G6));
+    // printf("%d \n", same_diag(E1, D2));
 
     // print_bb(BETWEEN[E8][G6]);
 
-    auto depth = 4;
+    // print_bb(67108864);
+
+    auto depth = 5;
 
     LOG("\nStarting test to depth %d \n", depth);
 
