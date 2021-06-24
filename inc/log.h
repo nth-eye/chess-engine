@@ -98,10 +98,10 @@ uint64_t perft(Board board, int depth)
             nodes += cnt;
             tmp = board;
         }
-        if (Root) {
-            print_mv(move); 
-            LOG("\t %lu \n", cnt);
-        }
+        // if (Root) {
+        //     print_mv(move); 
+        //     LOG("\t %lu \n", cnt);
+        // }
     }
     return nodes;
 }

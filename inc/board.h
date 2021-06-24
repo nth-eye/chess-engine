@@ -13,6 +13,7 @@ constexpr auto FEN_TEST_3   = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1
 struct Board {
 
     constexpr Board() = default;
+    constexpr Board(const Board &board, Move move) { *this = board; make_move(move); }
 
     void print() const;
     void clr_pos();
@@ -21,10 +22,13 @@ struct Board {
     bool attacked(Square s, Color att_clr) const;
     void moves(MoveList &list) const;
     void moves_pseudo(MoveList &list) const;
+    void moves_legal(MoveList &list) const;
     void make_move(Move move);
 
+    Bitboard danger() const;
+
     Bitboard all() const        { return pieces[WHITE] | pieces[BLACK]; }
-    Bitboard knights() const    { return all() & ~rooks & ~bishops & ~pawns & ~kings(); }
+    Bitboard knights() const    { return all() & ~(rooks | bishops | pawns | kings()); }
     Bitboard queens() const     { return rooks & bishops; }
     Bitboard kings() const      { return bit(k_sq[WHITE]) | bit(k_sq[BLACK]); }
 private:

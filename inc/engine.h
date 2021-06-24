@@ -5,9 +5,10 @@
 
 struct Engine {
 
-    Score negamax(Board board, int depth);
-    Score evaluate(Board board);
-
+    Score negamax(Board &board, int depth);
+    Score evaluate(Board &board);
+    MoveList gen_moves(Board &board);
+    
 private:
 
 };

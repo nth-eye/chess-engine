@@ -2,7 +2,6 @@
 #include "log.h"
 #include <cstring>
 #include <cstdlib>
-#include <algorithm>
 
 constexpr Square CASTLE_SQ[][2] = { { H1, A1 }, { H8, A8 } };
 constexpr MoveFlag PROMOTIONS[] = { N_PROM, B_PROM, R_PROM, Q_PROM };
@@ -213,24 +212,13 @@ bool Board::attacked(Square s, Color att_clr) const
 {
     Bitboard they = pieces[att_clr];
     Bitboard king = bit(k_sq[att_clr]);
+    Bitboard both = all();
 
-    // Bishops and queens
-    if (B_ATTACKS[s][all()]     & they & bishops)
-        return true;
-    // Rooks and queens
-    if (R_ATTACKS[s][all()]     & they & rooks)
-        return true;
-    // Pawns
-    if (P_ATTACKS[~att_clr][s]  & they & pawns)
-        return true;
-    // Knights
-    if (N_ATTACKS[s]            & they & knights())
-        return true;
-    // King
-    if (K_ATTACKS[s]            & king)
-        return true;
-
-    return false;
+    return  (P_ATTACKS[~att_clr][s] & they & pawns)     |
+            (B_ATTACKS[s][both]     & they & bishops)   |
+            (R_ATTACKS[s][both]     & they & rooks)     |
+            (N_ATTACKS[s]           & they & knights()) |
+            (K_ATTACKS[s]           & king);
 }
 
 void Board::moves_pseudo(MoveList &list) const
@@ -337,6 +325,179 @@ void Board::moves_pseudo(MoveList &list) const
         if (path_free(rook + EAST, king) && !path_attacked(king + WEST, king + EAST))
             list.save(king, king + WEST + WEST, Q_CAST);
     }
+}
+
+void Board::moves_legal(MoveList &list) const
+{
+    // Bitboard us     = pieces[side];
+    // Bitboard they   = pieces[~side];
+    // Bitboard both   = all();
+    // Square king     = k_sq[side];
+
+    // // King
+    // Bitboard to_go = K_ATTACKS[king] & ~(us | danger());
+
+    // for (const auto dst : BitIter(to_go)) 
+    //     list.save(king, dst);
+
+    // Bitboard checkers = 
+    //     (N_ATTACKS[king]        & they & knights()) |
+    //     (P_ATTACKS[side][king]  & they & pawns)     |
+    //     (B_ATTACKS[king][both]  & they & bishops)   |
+    //     (R_ATTACKS[king][both]  & they & rooks);
+
+    // Bitboard capture_mask; //   = 0xffffffffffffffff;
+    // Bitboard quiet_mask; //     = 0xffffffffffffffff;
+
+    // switch (cnt(checkers)) {
+
+    //     case 0: 
+    //         capture_mask    = they;
+    //         quiet_mask      = ~both;
+    //     break;
+
+    //     case 1:
+    //     {
+    //         capture_mask = checkers;
+
+    //         Square checker_sq = lsb(checkers);
+
+    //         if (get(they & bishops & rooks, checker_sq))
+    //             quiet_mask = SQUARES_BETWEEN[king][checker_sq];
+    //         else
+    //             quiet_mask = 0;
+    //     }
+    //     break;
+
+    //     default: return;
+    // }
+
+    // Bitboard candidates = 
+    //     (B_ATTACKS[king][they]  & they & bishops) |
+    //     (R_ATTACKS[king][they]  & they & rooks);
+
+    // for (auto s : BitIter(candidates)) {
+
+    // }
+
+    // auto path_free = [&] (Square src, Square dst) 
+    // {
+    //     while (src != dst) {
+    //         if (get(both, src))
+    //             return false;
+    //         ++src;
+    //     }
+    //     return true;
+    // };
+    // auto path_attacked = [this] (Square src, Square dst) 
+    // {
+    //     while (src != dst) {
+    //         if (attacked(src, ~side))
+    //             return true;
+    //         ++src;
+    //     }
+    //     return false;
+    // };
+    // auto ca_rights = castle >> (2 * side); 
+
+    // if (ca_rights & WKCA) {
+    //     auto rook = CASTLE_SQ[side][0];
+    //     if (path_free(king + EAST, rook) && !path_attacked(king, king + EAST + EAST))
+    //         list.save(king, king + EAST + EAST, K_CAST);
+    // }
+    // if (ca_rights & WQCA) {
+    //     auto rook = CASTLE_SQ[side][1];
+    //     if (path_free(rook + EAST, king) && !path_attacked(king + WEST, king + EAST))
+    //         list.save(king, king + WEST + WEST, Q_CAST);
+    // }
+    // // Pawn
+    // for (auto src : BitIter(us & pawns)) {
+
+    //     Direction dir   = side == WHITE ? NORTH : SOUTH;
+    //     Square dst      = src + dir;
+    //     Rank prom       = Rank((7 + side) & 7);
+    //     Rank push       = Rank(2 + side * 3);
+        
+    //     if (!get(both, dst)) {
+
+    //         if (rank(dst) != prom) {
+    //             // Quiet
+    //             list.save(src, dst);
+    //             // Double push
+    //             if (rank(dst) == push && !get(both, dst + dir))
+    //                 list.save(src, dst + dir, PUSH);
+    //         } else {
+    //             // Promotions
+    //             for (auto type : PROMOTIONS)
+    //                 list.save(src, dst, type);
+    //         }
+    //     }
+    //     // Captures
+    //     Bitboard to_go = P_ATTACKS[side][src] & they;
+
+    //     for (auto dst : BitIter(to_go)) {
+    //         if (rank(dst) == prom) {
+    //             // Promotions with capture
+    //             for (auto type : PROMOTIONS)
+    //                 list.save(src, dst, type);
+    //         } else {
+    //             list.save(src, dst);
+    //         }
+    //     }
+    //     // enPassant
+    //     if (bit(enps_sq) & P_ATTACKS[side][src])
+    //         list.save(src, enps_sq, ENPASS);
+    // }
+    // // Knight
+    // for (auto src : BitIter(us & knights())) {
+
+    //     Bitboard to_go = N_ATTACKS[src] & ~us;
+
+    //     for (auto dst : BitIter(to_go))
+    //         list.save(src, dst);
+    // }
+    // // Bishop / queen
+    // for (auto src : BitIter(us & bishops)) {
+
+    //     Bitboard to_go = B_ATTACKS[src][both] & ~us;
+
+    //     for (auto dst : BitIter(to_go))
+    //         list.save(src, dst);
+    // }
+    // // Rook / queen
+    // for (auto src : BitIter(us & rooks)) {
+
+    //     Bitboard to_go = R_ATTACKS[src][both] & ~us;
+
+    //     for (auto dst : BitIter(to_go))
+    //         list.save(src, dst);
+    // }
+}
+
+Bitboard Board::danger() const
+{
+    Bitboard bb         = 0;
+    Bitboard they       = pieces[~side];
+    Bitboard both       = all();
+    Bitboard king       = bit(k_sq[side]);
+    Square they_king    = k_sq[~side];
+
+    // Pawn
+    for (auto src : BitIter(they & pawns))
+        bb |= P_ATTACKS[~side][src];
+    // Knight
+    for (auto src : BitIter(they & knights()))
+        bb |= N_ATTACKS[src];
+    // Bishop / queen
+    for (auto src : BitIter(they & bishops))
+        bb |= B_ATTACKS[src][both ^ king];
+    // Rook / queen
+    for (auto src : BitIter(they & rooks))
+        bb |= R_ATTACKS[src][both ^ king];
+    // King
+    bb |= K_ATTACKS[they_king];
+
+    return bb;
 }
 
 void Board::moves(MoveList &list) const
