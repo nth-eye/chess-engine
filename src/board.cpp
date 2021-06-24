@@ -5,32 +5,33 @@
 
 constexpr Square CASTLE_SQ[][2] = { { H1, A1 }, { H8, A8 } };
 constexpr MoveFlag PROMOTIONS[] = { N_PROM, B_PROM, R_PROM, Q_PROM };
+constexpr auto BETWEEN_BB   = squares_between();
 constexpr auto P_ATTACKS    = attacks_pawn();
 constexpr auto N_ATTACKS    = attacks<KNIGHT>();
 constexpr auto K_ATTACKS    = attacks<KING  >();
 const auto B_ATTACKS        = attacks_magic<BISHOP>(B_MAGIC_NUM);
 const auto R_ATTACKS        = attacks_magic<ROOK  >(R_MAGIC_NUM);
 
-constexpr int CASTLE_PERM_FROM[64] = {
-    0xD, 0xF, 0xF, 0xF, 0xC, 0xF, 0xF, 0xE,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0x7, 0xF, 0xF, 0xF, 0x3, 0xF, 0xF, 0xB  
+constexpr Castle CASTLE_FROM[64] = {
+    BCA | WKCA, ANY_CA, ANY_CA, ANY_CA, BCA,    ANY_CA, ANY_CA, BCA | WQCA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    WCA | BKCA, ANY_CA, ANY_CA, ANY_CA, WCA,    ANY_CA, ANY_CA, WCA | BQCA,
 };
 
-constexpr int CASTLE_PERM_TO[64] = {
-    0xD, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xE,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF,
-    0x7, 0xF, 0xF, 0xF, 0xF, 0xF, 0xF, 0xB 
+constexpr Castle CASTLE_TO[64] = {
+    BCA | WKCA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, BCA | WQCA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
+    WCA | BKCA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, WCA | BQCA,
 };
 
 static bool str_to_int(const char *str, long *val, int base, char **end)
@@ -329,56 +330,61 @@ void Board::moves_pseudo(MoveList &list) const
 
 void Board::moves_legal(MoveList &list) const
 {
-    // Bitboard us     = pieces[side];
-    // Bitboard they   = pieces[~side];
-    // Bitboard both   = all();
-    // Square king     = k_sq[side];
+    Bitboard us     = pieces[side];
+    Bitboard they   = pieces[~side];
+    Bitboard both   = all();
+    Square king     = k_sq[side];
 
-    // // King
-    // Bitboard to_go = K_ATTACKS[king] & ~(us | danger());
+    // ANCHOR King
 
-    // for (const auto dst : BitIter(to_go)) 
-    //     list.save(king, dst);
+    Bitboard to_go = K_ATTACKS[king] & ~(us | danger());
 
-    // Bitboard checkers = 
-    //     (N_ATTACKS[king]        & they & knights()) |
-    //     (P_ATTACKS[side][king]  & they & pawns)     |
-    //     (B_ATTACKS[king][both]  & they & bishops)   |
-    //     (R_ATTACKS[king][both]  & they & rooks);
+    for (const auto dst : BitIter(to_go)) 
+        list.save(king, dst);
 
-    // Bitboard capture_mask; //   = 0xffffffffffffffff;
-    // Bitboard quiet_mask; //     = 0xffffffffffffffff;
+    Bitboard checkers = 
+        (N_ATTACKS[king]        & they & knights()) |
+        (P_ATTACKS[side][king]  & they & pawns)     |
+        (B_ATTACKS[king][both]  & they & bishops)   |
+        (R_ATTACKS[king][both]  & they & rooks);
 
-    // switch (cnt(checkers)) {
+    Bitboard capture_mask; //   = 0xffffffffffffffff;
+    Bitboard quiet_mask; //     = 0xffffffffffffffff;
 
-    //     case 0: 
-    //         capture_mask    = they;
-    //         quiet_mask      = ~both;
-    //     break;
+    switch (cnt(checkers)) {
 
-    //     case 1:
-    //     {
-    //         capture_mask = checkers;
+        case 0: 
+            capture_mask = they;
+            quiet_mask = ~both;
+        break;
 
-    //         Square checker_sq = lsb(checkers);
+        case 1:
+        {
+            capture_mask = checkers;
 
-    //         if (get(they & bishops & rooks, checker_sq))
-    //             quiet_mask = SQUARES_BETWEEN[king][checker_sq];
-    //         else
-    //             quiet_mask = 0;
-    //     }
-    //     break;
+            Square checker_sq = lsb(checkers);
+        
+            if (get(they & bishops & rooks, checker_sq))
+                quiet_mask = BETWEEN_BB[king][checker_sq];
+            else
+                quiet_mask = 0;
+        }
+        break;
 
-    //     default: return;
-    // }
+        default: return;
+    }
+    Bitboard pinned     = 0;
+    Bitboard candidates = 
+        (B_ATTACKS[king][they]  & they & bishops) |
+        (R_ATTACKS[king][they]  & they & rooks);
 
-    // Bitboard candidates = 
-    //     (B_ATTACKS[king][they]  & they & bishops) |
-    //     (R_ATTACKS[king][they]  & they & rooks);
+    for (auto s : BitIter(candidates)) {
 
-    // for (auto s : BitIter(candidates)) {
+        Bitboard pin = BETWEEN_BB[king][s] & us;
 
-    // }
+        if (cnt(pin) == 1)
+            pinned |= pin;
+    }
 
     // auto path_free = [&] (Square src, Square dst) 
     // {
@@ -526,8 +532,8 @@ void Board::make_move(Move move)
     ++half_clk;
     ++full_clk;
     enps_sq     = A1;
-    castle      &= CASTLE_PERM_FROM[src];
-    castle      &= CASTLE_PERM_TO[dst];
+    castle      &= CASTLE_FROM[src];
+    castle      &= CASTLE_TO[dst];
 
     auto do_castle = [this] (Square rook_src, Square rook_dst) 
     {
@@ -579,9 +585,9 @@ void Board::make_move(Move move)
     // Promotion
     if (f & N_PROM) {
         switch (f) {
-            case B_PROM: set(bishops, src); break;
-            case Q_PROM: set(bishops, src);
-            case R_PROM: set(rooks,   src); break;
+            case B_PROM: set(bishops, dst); break;
+            case Q_PROM: set(bishops, dst);
+            case R_PROM: set(rooks,   dst); break;
             default:;
         }
         clr(pawns, src);

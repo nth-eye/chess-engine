@@ -1,6 +1,7 @@
 # ChessEngine-cpp11
 
 ### TODO
-- [ ] Board
-- [ ] Сomputer player
+- [x] Functional Board
+- [ ] Legal moves generation on the fly
+- [ ] Negamax
 - [ ] UCI protocol

@@ -240,4 +240,25 @@ auto attacks_magic(const Bitboard *magic_nums)
     return magics;
 }
 
+constexpr auto squares_between()
+{
+    std::array<Bitboard[SQ_num], SQ_num> bb = {};
+
+    for (Square src = A1; src <= H8; ++src) {
+        for (Square dst = A1; dst <= H8; ++dst) {
+            if (rank(src) == rank(dst) || 
+                file(src) == file(dst))
+            {
+                bb[src][dst] =  attacks_sliding<ROOK>(src, bit(dst)) & 
+                                attacks_sliding<ROOK>(dst, bit(src));
+            } else {
+                bb[src][dst] =  attacks_sliding<BISHOP>(src, bit(dst)) & 
+                                attacks_sliding<BISHOP>(dst, bit(src));
+            }
+            // set(bb[src][dst], dst);
+        }
+    }
+    return bb;
+}
+
 #endif // BITBOARD_H

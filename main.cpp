@@ -17,22 +17,38 @@ clock_t measure_time(Fn &&fn, Args &&...args)
 
 int main(int, char**) 
 {
-    Board board;
+    // constexpr auto SQUARES_BETWEEN = squares_between();
 
-    if (board.set_pos(FEN_START))
-        board.print();
-    else 
-        LOG("set_pos: failed \n");
+    // Square src = A1;
+    // Square dst = A6;
 
-    auto depth = 6;
+    // print_bb(SQUARES_BETWEEN[src][dst]);
 
-    LOG("\nStarting test to depth %d \n", depth);
+    // for (Square src = A1; src <= A1; ++src) {
+    //     for (Square dst = A1; dst <= H8; ++dst) {
+    //         print_sq(src);
+    //         printf(" - ");
+    //         print_sq(dst);
+    //         printf("\n");
+    //         print_bb(SQUARES_BETWEEN[src][dst]);
+    //     }
+    // }
+    // Board board;
 
-    auto start = std::chrono::steady_clock::now();
-    auto all_nodes = perft<true>(board, depth);
-    auto time = std::chrono::steady_clock::now() - start;
+    // if (board.set_pos(FEN_START))
+    //     board.print();
+    // else 
+    //     LOG("set_pos: failed \n");
 
-    LOG("\nTest completed: %lu nodes visited in %f ms \n", all_nodes, time.count() / 1'000'000.0);
+    // auto depth = 6;
+
+    // LOG("\nStarting test to depth %d \n", depth);
+
+    // auto start = std::chrono::steady_clock::now();
+    // auto all_nodes = perft<true>(board, depth);
+    // auto time = std::chrono::steady_clock::now() - start;
+
+    // LOG("\nTest completed: %lu nodes visited in %f ms \n", all_nodes, time.count() / 1'000'000.0);
 
     // printf("test:   %lu clock_t \n", measure_time<10000>(perft, board, depth));
 }

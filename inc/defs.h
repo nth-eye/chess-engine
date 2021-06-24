@@ -34,7 +34,7 @@ enum Castle : uint_fast8_t {
     QCA         = WQCA | BQCA,
     WCA         = WKCA | WQCA,
     BCA         = BKCA | BQCA,
-    CASTLE_ANY  = WCA  | BCA,
+    ANY_CA      = WCA  | BCA,
     CASTLE_num,
 };
 enum Direction {
