@@ -3,26 +3,10 @@
 #include <cstring>
 #include <cstdlib>
 
-constexpr Bitboard CASTLE_MASK[][2] = { 
-    { 0x0000000000000060, 0x000000000000000e }, 
-    { 0x6000000000000000, 0x0e00000000000000 },
+constexpr Bitboard CASTLE_MASK[2][3] = { 
+    { 0x0000000000000060, 0x000000000000000e, 0x000000000000000c }, 
+    { 0x6000000000000000, 0x0e00000000000000, 0x0c00000000000000 },
 };
-// constexpr Square CASTLE_SQ[][2] = { { H1, A1 }, { H8, A8 } };
-constexpr MoveFlag PROMOTIONS[] = { N_PROM, B_PROM, R_PROM, Q_PROM };
-constexpr auto BETWEEN_BB   = betweens();
-constexpr auto LINE_BB      = lines();
-constexpr auto P_ATTACKS    = attacks_pawn();
-constexpr auto N_ATTACKS    = attacks<KNIGHT>();
-constexpr auto K_ATTACKS    = attacks<KING  >();
-const auto B_ATTACKS        = attacks_magic<BISHOP>(B_MAGIC_NUM);
-const auto R_ATTACKS        = attacks_magic<ROOK  >(R_MAGIC_NUM);
-
-constexpr void add_moves(Square src, Bitboard all_dst, MoveList &list)
-{
-    for (auto dst : BitIter(all_dst))
-        list.save(src, dst);
-}
-
 constexpr Castle CASTLE_FROM[64] = {
     BCA | WKCA, ANY_CA, ANY_CA, ANY_CA, BCA,    ANY_CA, ANY_CA, BCA | WQCA,
     ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
@@ -33,7 +17,6 @@ constexpr Castle CASTLE_FROM[64] = {
     ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
     WCA | BKCA, ANY_CA, ANY_CA, ANY_CA, WCA,    ANY_CA, ANY_CA, WCA | BQCA,
 };
-
 constexpr Castle CASTLE_TO[64] = {
     BCA | WKCA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, BCA | WQCA,
     ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
@@ -44,6 +27,14 @@ constexpr Castle CASTLE_TO[64] = {
     ANY_CA,     ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA,
     WCA | BKCA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, ANY_CA, WCA | BQCA,
 };
+constexpr MoveFlag PROMOTIONS[] = { N_PROM, B_PROM, R_PROM, Q_PROM };
+constexpr auto BETWEEN_BB   = betweens();
+constexpr auto LINE_BB      = lines();
+constexpr auto P_ATTACKS    = attacks_pawn();
+constexpr auto N_ATTACKS    = attacks<KNIGHT>();
+constexpr auto K_ATTACKS    = attacks<KING  >();
+const auto B_ATTACKS        = attacks_magic<BISHOP>(B_MAGIC_NUM);
+const auto R_ATTACKS        = attacks_magic<ROOK  >(R_MAGIC_NUM);
 
 static bool str_to_int(const char *str, long *val, int base, char **end)
 {
@@ -54,6 +45,12 @@ static bool str_to_int(const char *str, long *val, int base, char **end)
         return true;
     }
     return false;
+}
+
+static void add_moves(Square src, Bitboard all_dst, MoveList &list)
+{
+    for (auto dst : BitIter(all_dst))
+        list.save(src, dst);
 }
 
 void Board::print() const
@@ -229,7 +226,6 @@ Bitboard Board::restricted() const
     Bitboard both       = all();
     Bitboard king       = bit(k_sq[Side]);
     Square they_king    = k_sq[~Side];
-
     // Pawn
     for (auto src : BitIter(they & pawns))
         bb |= P_ATTACKS[~Side][src];
@@ -301,8 +297,8 @@ void Board::moves_all(MoveList &list) const
             pinned |= pin;
     }
 
-    Bitboard capture_mask; //   = 0xffffffffffffffff;
-    Bitboard quiet_mask; //     = 0xffffffffffffffff;
+    Bitboard capture_mask;
+    Bitboard quiet_mask;
     Bitboard legal_mask;
 
     switch (cnt(checkers)) {
@@ -315,33 +311,21 @@ void Board::moves_all(MoveList &list) const
 
             auto ca_rights = castle >> (2 * Side); 
 
-            if (ca_rights & WKCA && !((both | danger) & CASTLE_MASK[Side][0])) {
+            if (ca_rights & WKCA && !((both | danger) & CASTLE_MASK[Side][0]))
                 list.save(king, king + EAST + EAST, K_CAST);
-            }
-            if (ca_rights & WQCA && !((both | danger) & CASTLE_MASK[Side][1])) {
+
+            if (ca_rights   & WQCA && 
+                !(both      & CASTLE_MASK[Side][1]) && 
+                !(danger    & CASTLE_MASK[Side][2]))
                 list.save(king, king + WEST + WEST, Q_CAST);
-            }
 
-            Bitboard pinned_bishops = pinned & bishops;
-            Bitboard pinned_rooks   = pinned & rooks;
-            Bitboard pinned_pawns   = pinned & pawns;
+            moves_pawn<Side, true>(pinned & pawns, capture_mask, quiet_mask, list);
 
-            for (auto src : BitIter(pinned_bishops))
+            for (auto src : BitIter(pinned & bishops))
                 add_moves(src, B_ATTACKS[src][both] & legal_mask & LINE_BB[king][src], list);
             
-            for (auto src : BitIter(pinned_rooks))
+            for (auto src : BitIter(pinned & rooks))
                 add_moves(src, R_ATTACKS[src][both] & legal_mask & LINE_BB[king][src], list);
-
-            // if (enps_sq) {
-            //     Bitboard bb = P_ATTACKS[~Side][enps_sq] & pinned_pawns;
-
-            //     for (auto src : BitIter(bb)) {
-            //         Move move = mv(src, enps_sq, ENPASS);
-            //         if (legal(move))
-            //             list.save(move);
-            //     }
-            // }
-            moves_pawn<Side, true>(pinned_pawns, capture_mask, quiet_mask, list);
         }
         break;
 
@@ -365,6 +349,7 @@ void Board::moves_all(MoveList &list) const
     Bitboard not_pinned = ~pinned;
 
     if (enps_sq) {
+
         Bitboard bb = P_ATTACKS[~Side][enps_sq] & pawns & us & not_pinned;
 
         for (auto src : BitIter(bb)) {
@@ -376,7 +361,7 @@ void Board::moves_all(MoveList &list) const
     moves_pawn<Side, false>(us & not_pinned & pawns, capture_mask, quiet_mask, list);
     
     for (auto src : BitIter(us & not_pinned & knights()))
-        add_moves(src, N_ATTACKS[src] & legal_mask, list);
+        add_moves(src, N_ATTACKS[src]       & legal_mask, list);
 
     for (auto src : BitIter(us & not_pinned & bishops))
         add_moves(src, B_ATTACKS[src][both] & legal_mask, list);

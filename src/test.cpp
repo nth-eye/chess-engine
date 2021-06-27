@@ -13,7 +13,7 @@ void test_perft(const char *file_name)
     const char *position = NULL;
     uint64_t line_cnt = 0;
     uint64_t correct_nodes = 0;
-    int depth = 1;
+    int depth = 3;
 
     Board board;
 
@@ -21,7 +21,7 @@ void test_perft(const char *file_name)
 
         ++line_cnt;
 
-        // printf("[%04d]: %s \n", line_cnt, line.c_str());
+        printf("[%04d]: %s \n", line_cnt, line.c_str());
 
         std::stringstream ss{line};
         std::vector<std::string> words;
@@ -35,7 +35,7 @@ void test_perft(const char *file_name)
         }
 
         position        = words[0].c_str();
-        correct_nodes   = std::stoi(words[1]);
+        correct_nodes   = std::stoi(words[depth]);
 
         // printf("[%04lu]:            \n\
         //     position        = %s    \n\
