@@ -22,7 +22,7 @@ Score Engine::negamax(Board &board, int depth)
 
 Score Engine::evaluate(Board &board)
 {
-    
+    return 0;
 }
 
 MoveList Engine::gen_moves(Board &board)

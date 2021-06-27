@@ -17,20 +17,8 @@ clock_t measure_time(Fn &&fn, Args &&...args)
 
 int main(int, char**) 
 {
-    constexpr auto BETWEEN = betweens();
-
-    // for (Square src = A1; src <= A1; ++src) {
-    //     for (Square dst = A1; dst <= H8; ++dst) {
-    //         print_sq(src);
-    //         printf(" - ");
-    //         print_sq(dst);
-    //         printf("\n");
-    //         print_bb(BETWEEN[src][dst]);
-    //     }
-    // }
-
-    constexpr auto checker = "4k3/8/6n1/4R3/8/8/8/4K3 b - - 0 1";
-    constexpr auto pinner = "4k3/8/4r3/8/8/4Q3/8/2K5 b - - 0 1";
+    // constexpr auto checker = "4k3/8/6n1/4R3/8/8/8/4K3 b - - 0 1";
+    // constexpr auto pinner = "4k3/8/4r3/8/8/4Q3/8/2K5 b - - 0 1";
     // "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
     // "rn1qkbnr/p3ppp1/1ppp2Qp/3B4/6b1/2P4P/PP1PPP2/RNB1K1NR b KQkq - 0 1"
     // "r4br1/8/2Q2npp/Pkn1p3/8/2PPP1qP/4bP2/RNB1KB2 b -Q-- - 0 1"
@@ -48,6 +36,12 @@ int main(int, char**)
     else 
         LOG("set_pos: failed \n");
 
+    // board.make_move(mv(D2, D4, PUSH));
+    // board.make_move(mv(E7, E5, PUSH));
+    // board.make_move(mv(D4, D5));
+    // board.make_move(mv(C7, C5, PUSH));
+    // board.print();
+
     // MoveList list;
 
     // board.moves_legal(list);
@@ -62,13 +56,8 @@ int main(int, char**)
     //     tmp.print();
     // }
 
-    // printf("%d \n", same_diag(E1, D2));
 
-    // print_bb(BETWEEN[E8][G6]);
-
-    // print_bb(67108864);
-
-    auto depth = 5;
+    auto depth = 6;
 
     LOG("\nStarting test to depth %d \n", depth);
 

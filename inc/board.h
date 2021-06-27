@@ -15,17 +15,17 @@ struct Board {
     constexpr Board() = default;
     constexpr Board(const Board &board, Move move) { *this = board; make_move(move); }
 
+    template<Color Side>    Bitboard danger() const;
+    template<Color Side>    bool attacked(Square s) const;
+    template<Color Side>    bool legal(Move move) const;
+    template<Color Side>    void moves_pseudo(MoveList &list) const;
+    template<Color Side>    void moves_legal(MoveList &list) const;
+    void moves(MoveList &list) const;
+
     void print() const;
     void clr_pos();
     bool set_pos(const char *fen);
-    bool legal(Move move) const;
-    bool attacked(Square s, Color att_clr) const;
-    void moves(MoveList &list) const;
-    void moves_pseudo(MoveList &list) const;
-    void moves_legal(MoveList &list) const;
     void make_move(Move move);
-
-    Bitboard danger() const;
 
     Bitboard all() const        { return pieces[WHITE] | pieces[BLACK]; }
     Bitboard knights() const    { return all() & ~(rooks | bishops | pawns | kings()); }
