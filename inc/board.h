@@ -15,13 +15,16 @@ struct Board {
     constexpr Board() = default;
     constexpr Board(const Board &board, Move move) { *this = board; make_move(move); }
 
-    template<Color Side>    Bitboard danger() const;
-    template<Color Side>    bool attacked(Square s) const;
-    template<Color Side>    bool legal(Move move) const;
-    template<Color Side>    void moves_pseudo(MoveList &list) const;
-    template<Color Side>    void moves_legal(MoveList &list) const;
+    template<Color Side>    
+    Bitboard restricted() const;
+    template<Color Side>    
+    bool attacked(Square s) const;
+    template<Color Side>    
+    bool legal(Move move) const;
+    template<Color Side>    
+    void moves_all(MoveList &list) const;
     template<Color Side, bool Pinned> 
-    void pawn_moves(Bitboard selected_pawns, Bitboard capture_mask, Bitboard quiet_mask, MoveList &list) const;
+    void moves_pawn(Bitboard selected_pawns, Bitboard capture_mask, Bitboard quiet_mask, MoveList &list) const;
     void moves(MoveList &list) const;
 
     void print() const;
