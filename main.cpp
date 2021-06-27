@@ -1,5 +1,4 @@
 #include <ctime>
-#include <chrono>
 #include "log.h"
 #include "board.h"
 #include "test.h"
@@ -23,19 +22,14 @@ int main(int, char**)
     if (board.set_pos(FEN_START))
         board.print();
     else 
-        LOG("set_pos: failed \n");
+        printf("set_pos: failed \n");
 
-    auto depth = 6;
+    constexpr int depth = 4;
 
-    LOG("\nStarting test to depth %d \n", depth);
-
-    auto start = std::chrono::steady_clock::now();
-    auto all_nodes = perft<true>(board, depth);
-    auto time = std::chrono::steady_clock::now() - start;
-
-    LOG("\nTest completed: %lu nodes visited in %f ms \n", all_nodes, time.count() / 1'000'000.0);
-
-    // printf("test:   %lu clock_t \n", measure_time<10000>(perft, board, depth));
+    printf("Test to depth [%d]: %lu nodes visited in %f seconds \n", 
+        depth,
+        perft<true>(board, depth), 
+        measure_time<1000>(perft<true>, board, depth) / (double) CLOCKS_PER_SEC);
 
     // test_perft("../perft.txt");
 }
