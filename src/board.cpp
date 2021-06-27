@@ -110,7 +110,7 @@ void Board::clr_pos()
 
 bool Board::set_pos(const char *c)
 {
-    // LOG("%s: %s \n", __func__, c);
+    LOG("%s: %s \n", __func__, c);
 
     clr_pos();
 
@@ -194,26 +194,26 @@ bool Board::set_pos(const char *c)
     }
     ++c;
 
-    // if (*c++ != ' ')
-    //     return false;
+    if (*c++ != ' ')
+        return false;
 
-    // long val;
-    // char *end = NULL;
+    long val;
+    char *end = NULL;
 
-    // if (!str_to_int(c, &val, 10, &end) || val >= 100)
-    //     return false; 
-    // half_clk = val;
+    if (!str_to_int(c, &val, 10, &end) || val >= 100)
+        return false; 
+    half_clk = val;
 
-    // c = end;
+    c = end;
 
-    // if (*c++ != ' ')
-    //     return false;
+    if (*c++ != ' ')
+        return false;
 
-    // if (!str_to_int(c, &val, 10, &end) || val < 1)
-    //     return false; 
-    // full_clk = (val - 1) * 2 + side;
+    if (!str_to_int(c, &val, 10, &end) || val < 1)
+        return false; 
+    full_clk = (val - 1) * 2 + side;
 
-    // LOG("%s: remainder - [%s] \n", __func__, end);
+    LOG("%s: remainder - [%s] \n", __func__, end);
 
     return true;
 }
@@ -350,7 +350,7 @@ void Board::moves_all(MoveList &list) const
 
     if (enps_sq) {
 
-        Bitboard bb = P_ATTACKS[~Side][enps_sq] & pawns & us & not_pinned;
+        Bitboard bb = P_ATTACKS[~Side][enps_sq] & pawns & us;
 
         for (auto src : BitIter(bb)) {
             Move move = mv(src, enps_sq, ENPASS);

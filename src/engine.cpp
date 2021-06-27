@@ -22,6 +22,8 @@ Score Engine::negamax(Board &board, int depth)
 
 Score Engine::evaluate(Board &board)
 {
+    (void) board;
+
     return 0;
 }
 

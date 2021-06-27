@@ -6,22 +6,21 @@
 
 void test_perft(const char *file_name)
 {
+    constexpr int depth     = 5;
+    const char *position    = NULL;
+    uint64_t line_cnt       = 0;
+    uint64_t correct_nodes  = 0;
+    Board board;
+
     std::ifstream ifs{file_name};
     std::string line;
     std::string word;
-
-    const char *position = NULL;
-    uint64_t line_cnt = 0;
-    uint64_t correct_nodes = 0;
-    int depth = 3;
-
-    Board board;
 
     while (std::getline(ifs, line)) {
 
         ++line_cnt;
 
-        printf("[%04d]: %s \n", line_cnt, line.c_str());
+        printf("[%04lu]: %s \n", line_cnt, line.c_str());
 
         std::stringstream ss{line};
         std::vector<std::string> words;
@@ -29,18 +28,13 @@ void test_perft(const char *file_name)
         while (std::getline(ss, word, ','))
             words.push_back(word);
 
-        if (words.size() < 2) {
+        if (words.size() < depth + 1) {
             printf("[%04lu]: not enough arguments \n", line_cnt);
             continue;
         }
 
         position        = words[0].c_str();
         correct_nodes   = std::stoi(words[depth]);
-
-        // printf("[%04lu]:            \n\
-        //     position        = %s    \n\
-        //     correct_nodes   = %lu   \n", 
-        //     line_cnt, position, correct_nodes);
 
         if (!board.set_pos(position)) {
             printf("[%04lu]: set_pos failed \n", line_cnt);
@@ -53,9 +47,6 @@ void test_perft(const char *file_name)
             printf("[%04lu]: %lu != %lu in %s \n", line_cnt, nodes, correct_nodes, position);
             return;
         }
-
-        // if (line_cnt >= 10)
-        //     return;
     }
     printf("ALL TESTS successfully finished for depth %d \n", depth);
 }
