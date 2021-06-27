@@ -20,6 +20,8 @@ struct Board {
     template<Color Side>    bool legal(Move move) const;
     template<Color Side>    void moves_pseudo(MoveList &list) const;
     template<Color Side>    void moves_legal(MoveList &list) const;
+    template<Color Side, bool Pinned> 
+    void pawn_moves(Bitboard selected_pawns, Bitboard capture_mask, Bitboard quiet_mask, MoveList &list) const;
     void moves(MoveList &list) const;
 
     void print() const;
