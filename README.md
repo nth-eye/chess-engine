@@ -1,7 +1,6 @@
-# ChessEngine-cpp11
+# ChessEngine-cpp
 
 ### TODO
-- [x] Functional Board
-- [ ] Legal moves generation on the fly
+- [ ] Optimize movegen
 - [ ] Negamax
 - [ ] UCI protocol
