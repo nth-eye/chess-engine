@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "log.h"
 #include <climits>
 
 void Engine::reset()
@@ -8,6 +9,8 @@ void Engine::reset()
 
 Move Engine::search(int depth)
 {
+    nodes = 0;
+
     Move best_move      = NULL_MOVE;
     Score best_score    = INT_MIN + 1;
 
@@ -17,8 +20,7 @@ Move Engine::search(int depth)
 
     for (auto move : list) {
 
-        Board tmp = { position, move };
-
+        Board tmp   = { position, move };
         Score score = alphabeta(tmp, INT_MIN + 1, INT_MAX - 1, depth - 1);
 
         if (best_score < score) {
@@ -26,6 +28,7 @@ Move Engine::search(int depth)
             best_move  = move;
         }
     }
+    LOG("nodes: %lu \n", nodes);
     return best_move;
 }
 
@@ -33,6 +36,8 @@ Score Engine::alphabeta(Board &board, Score alpha, Score beta, int depth)
 {
     if (!depth)
         return evaluate(board);
+
+    ++nodes;
 
     Score score = INT_MIN + 1;
 
@@ -54,29 +59,6 @@ Score Engine::alphabeta(Board &board, Score alpha, Score beta, int depth)
     }
     return alpha;
 }
-
-// Score Engine::negamax(Board &board, int depth)
-// {
-//     if (!depth)
-//         return evaluate(board);
-
-//     Score max = INT_MIN;
-
-//     MoveList list;
-
-//     board.moves(list);
-
-//     for (const auto move : list) {
-
-//         Board tmp = { board, move };
-
-//         Score score = -negamax(tmp, depth - 1);
-
-//         if (max < score)
-//             max = score;
-//     }
-//     return max;
-// }
 
 Score Engine::evaluate(Board &board)
 {

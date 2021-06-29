@@ -22,7 +22,7 @@ int main(int, char**)
 
     engine.reset();
 
-    Move best_move = engine.search(7);
+    Move best_move = engine.search(8);
 
     print_mv(best_move);
     printf("\n");

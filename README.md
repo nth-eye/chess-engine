@@ -2,6 +2,7 @@
 
 ### TODO
 - [ ] Optimize movegen
-- [ ] Negamax
-- [ ] AlphaBeta
+- [x] Negamax
+- [x] AlphaBeta
+- [ ] Fix evaluation and add position into account
 - [ ] UCI protocol

@@ -12,6 +12,7 @@ struct Engine {
     Score evaluate(Board &board);
 private:
     Board position;
+    uint64_t nodes;
 };
 
 #endif // ENGINE_H
