@@ -5,6 +5,7 @@
 #include "misc.h"
 
 constexpr size_t MAX_MOVES = 412;
+constexpr Move NULL_MOVE = 0;
 
 struct MoveList {
     constexpr const Move* begin() const { return list; }

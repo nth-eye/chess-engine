@@ -5,12 +5,13 @@
 
 struct Engine {
 
+    void reset();
+    Move search(int depth);
+    Score alphabeta(Board &board, Score alpha, Score beta, int depth);
     Score negamax(Board &board, int depth);
     Score evaluate(Board &board);
-    MoveList gen_moves(Board &board);
-    
 private:
-
+    Board position;
 };
 
 #endif // ENGINE_H

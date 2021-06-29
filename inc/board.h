@@ -33,7 +33,7 @@ struct Board {
     Bitboard knights() const    { return all() & ~(rooks | bishops | pawns | kings()); }
     Bitboard queens() const     { return rooks & bishops; }
     Bitboard kings() const      { return bit(k_sq[WHITE]) | bit(k_sq[BLACK]); }
-private:
+
     Bitboard pieces[COLOR_num]  = {};
     Bitboard pawns              = 0;
     Bitboard bishops            = 0;
