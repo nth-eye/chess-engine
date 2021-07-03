@@ -62,8 +62,6 @@ constexpr bool same_diag(Square s1, Square s2)
 {
     return  (rank(s2) - rank(s1)) == (file(s2) - file(s1)) ||
             (rank(s2) - rank(s1)) +  (file(s2) - file(s1)) == 0;
-            // ((s2 - s1) & 7) +   ((s2 >> 3) - (s1 >> 3)) == 0; 
-            //rank(s1) - file(s1) == rank(s2) - file(s2);
 }
 
 constexpr char file_c(File f)               { return 'a' + f; }

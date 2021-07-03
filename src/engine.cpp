@@ -1,10 +1,54 @@
+#include <climits>
+#include <ctime>
 #include "engine.h"
 #include "log.h"
-#include <climits>
+
+template<bool Root = true>
+uint64_t perft_(Board board, int depth) 
+{
+    Board tmp           = board;
+    uint64_t nodes      = 0;
+    uint64_t cnt;
+
+    MoveList list;
+
+    board.moves(list);
+
+    for (auto move : list) {
+
+        if (Root && depth <= 1) {
+            cnt = 1;
+            ++nodes;
+        } else {
+            tmp.make_move(move);
+
+            if (depth == 2) {
+                MoveList leaf_moves;
+                tmp.moves(leaf_moves);
+                cnt = leaf_moves.size();
+                // cnt = tmp.moves().size();
+            } else {
+                cnt = perft_<false>(tmp, depth - 1);
+            }
+            nodes += cnt;
+            tmp = board;
+        }
+        if (Root) {
+            print_mv(move); 
+            LOG("\t %lu \n", cnt);
+        }
+    }
+    return nodes;
+}
+
+bool Engine::set(const char *fen)
+{
+    return position.set_pos(fen);
+}
 
 void Engine::reset()
 {
-    position.set_pos(FEN_START);
+    set(FEN_START);
 }
 
 Move Engine::search(int depth)
@@ -14,11 +58,7 @@ Move Engine::search(int depth)
     Move best_move      = NULL_MOVE;
     Score best_score    = INT_MIN + 1;
 
-    MoveList list;
-
-    position.moves(list);
-
-    for (auto move : list) {
+    for (auto move : moves()) {
 
         Board tmp   = { position, move };
         Score score = alphabeta(tmp, INT_MIN + 1, INT_MAX - 1, depth - 1);
@@ -79,4 +119,30 @@ Score Engine::evaluate(Board &board)
     score -= 200 * cnt(board.kings()   & board.pieces[BLACK]);
 
     return score - (score * 2 * board.side);
+}
+
+MoveList Engine::moves()
+{
+    MoveList list;
+
+    position.moves(list);
+
+    return list;
+}
+
+uint64_t Engine::perft(int depth)
+{
+    clock_t begin = clock();
+
+    uint64_t all_nodes = perft_<true>(position, depth);
+
+    clock_t end = clock();
+    clock_t ticks = end - begin;
+
+    LOG("Perft to depth [%d]: %lu nodes visited in %f seconds \n", 
+        depth,
+        all_nodes, 
+        ticks / (double) CLOCKS_PER_SEC);
+
+    return nodes;
 }

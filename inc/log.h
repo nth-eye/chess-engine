@@ -5,37 +5,32 @@
 #include <cstdio>
 
 #define LOG     printf
-#define LOGC    putchar
 
-#if !defined(LOG) || !defined(LOGC)
+#if !defined(LOG)
 #define LOG(...)
-#define LOGC(...)
-#warning "To enable printing define LOG and LOGC as output mechanisms";
+#warning "To enable printing define LOG as output mechanisms";
 #endif
 
 constexpr void print_sq(Square s)
 {
-    LOGC('a' + file(s));
-    LOGC('1' + rank(s));
+    LOG("%c%c", 'a' + file(s), '1' + rank(s));
 }
 
 constexpr void print_bb(Bitboard bb)
 {
-    LOGC('\n');
+    LOG("\n");
     for (Rank r = RANK_8; r >= RANK_1; --r) {
         LOG("%c   ", rank_c(r));
-        for (File f = FILE_A; f <= FILE_H; ++f) {
-            LOGC(get(bb, sq(r, f)) ? 'X' : '-');
-            LOGC(' ');
-        }
-        LOGC('\n');
+        for (File f = FILE_A; f <= FILE_H; ++f)
+            LOG("%c ", get(bb, sq(r, f)) ? 'X' : '-');
+        LOG("\n");
     }
     LOG("\n   ");
     for (File f = FILE_A; f <= FILE_H; ++f)
         LOG(" %c", file_c(f));
     LOG("\n\n");
     LOG("hex:   %016lx \n", bb);
-    LOGC('\n');
+    LOG("\n");
 }
 
 constexpr void print_mv(Move m) 
@@ -43,10 +38,10 @@ constexpr void print_mv(Move m)
     print_sq(from(m));
     print_sq(to(m));
     switch (flag(m)) {
-        case N_PROM: LOGC('n'); break;
-        case B_PROM: LOGC('b'); break;
-        case R_PROM: LOGC('r'); break;
-        case Q_PROM: LOGC('q'); break;
+        case N_PROM: LOG("n"); break;
+        case B_PROM: LOG("b"); break;
+        case R_PROM: LOG("r"); break;
+        case Q_PROM: LOG("q"); break;
         default:;
     }
 }
@@ -66,44 +61,7 @@ constexpr void print_moves(const MoveList &list)
         //     LOG("%s ", bit_rep[(move >> (12 - i * 4)) & 0xf]);
         print_mv(move);
     }
-    LOGC('\n');
-}
-
-template<bool Root = true>
-uint64_t perft(Board board, int depth) 
-{
-    Board tmp           = board;
-    uint64_t nodes      = 0;
-    uint64_t cnt;
-
-    MoveList list;
-
-    board.moves(list);
-
-    for (auto move : list) {
-
-        if (Root && depth <= 1) {
-            cnt = 1;
-            ++nodes;
-        } else {
-            tmp.make_move(move);
-
-            if (depth == 2) {
-                MoveList leaf_moves;
-                tmp.moves(leaf_moves);
-                cnt = leaf_moves.size();
-            } else {
-                cnt = perft<false>(tmp, depth - 1);
-            }
-            nodes += cnt;
-            tmp = board;
-        }
-        // if (Root) {
-        //     print_mv(move); 
-        //     LOG("\t %lu \n", cnt);
-        // }
-    }
-    return nodes;
+    LOG("\n");
 }
 
 #endif // LOG_H

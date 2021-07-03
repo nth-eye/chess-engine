@@ -1,5 +1,5 @@
 #include "test.h"
-#include "board.h"
+#include "engine.h"
 #include "log.h"
 #include <fstream>
 #include <sstream>
@@ -10,7 +10,7 @@ void test_perft(const char *file_name)
     const char *position    = NULL;
     uint64_t line_cnt       = 0;
     uint64_t correct_nodes  = 0;
-    Board board;
+    Engine engine;
 
     std::ifstream ifs{file_name};
     std::string line;
@@ -36,12 +36,12 @@ void test_perft(const char *file_name)
         position        = words[0].c_str();
         correct_nodes   = std::stoi(words[depth]);
 
-        if (!board.set_pos(position)) {
+        if (!engine.set(position)) {
             printf("[%04lu]: set_pos failed \n", line_cnt);
             continue;
         }
 
-        uint64_t nodes = perft<true>(board, depth);
+        uint64_t nodes = engine.perft(depth);
 
         if (nodes != correct_nodes) {
             printf("[%04lu]: %lu != %lu in %s \n", line_cnt, nodes, correct_nodes, position);

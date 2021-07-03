@@ -55,7 +55,7 @@ static void add_moves(Square src, Bitboard all_dst, MoveList &list)
 
 void Board::print() const
 {
-    LOGC('\n');
+    LOG("\n");
     for (Rank r = RANK_8; r >= RANK_1; --r) {
         LOG("%c   ", rank_c(r));
         for (File f = FILE_A; f <= FILE_H; ++f) {
@@ -81,7 +81,7 @@ void Board::print() const
 
             LOG("%c ", c);
         }
-        LOGC('\n');
+        LOG("\n");
     }
     LOG("\n   ");
     for (File f = FILE_A; f <= FILE_H; ++f)
@@ -100,7 +100,7 @@ void Board::print() const
     LOG("full:  %u          \n", full_clk);
     LOG("side:  %c          \n", side_c(side));
     LOG("size:  %lu bytes   \n", sizeof(Board));
-    LOGC('\n');
+    LOG("\n");
 }
 
 void Board::clr_pos()
@@ -110,7 +110,7 @@ void Board::clr_pos()
 
 bool Board::set_pos(const char *c)
 {
-    LOG("%s: %s \n", __func__, c);
+    // LOG("%s: %s \n", __func__, c);
 
     clr_pos();
 
@@ -213,7 +213,7 @@ bool Board::set_pos(const char *c)
         return false; 
     full_clk = (val - 1) * 2 + side;
 
-    LOG("%s: remainder - [%s] \n", __func__, end);
+    // LOG("%s: remainder - [%s] \n", __func__, end);
 
     return true;
 }
