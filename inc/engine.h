@@ -5,8 +5,9 @@
 
 struct Engine {
 
-    bool set(const char *fen);
     void reset();
+    bool set(const char *fen);
+    bool make_move(Move move);
     Move search(int depth);
     MoveList moves();
     uint64_t perft(int depth);

@@ -110,7 +110,7 @@ void Board::clr_pos()
 
 bool Board::set_pos(const char *c)
 {
-    // LOG("%s: %s \n", __func__, c);
+    LOG("<%s>: %s \n", __func__, c);
 
     clr_pos();
 
@@ -213,7 +213,8 @@ bool Board::set_pos(const char *c)
         return false; 
     full_clk = (val - 1) * 2 + side;
 
-    // LOG("%s: remainder - [%s] \n", __func__, end);
+    if (strlen(end))
+        LOG("<%s>: remainder - [%s] \n", __func__, end);
 
     return true;
 }
@@ -264,6 +265,17 @@ bool Board::legal(Move move) const
     Board board = { *this, move };
 
     return !board.attacked<~Side>(board.k_sq[Side]);
+}
+
+bool Board::legal(Move move) const
+{
+    MoveList list;
+    moves(list);
+
+    for (auto m : list)
+        if (m == move)
+            return true;
+    return false;
 }
 
 template<Color Side>

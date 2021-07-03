@@ -26,7 +26,6 @@ uint64_t perft_(Board board, int depth)
                 MoveList leaf_moves;
                 tmp.moves(leaf_moves);
                 cnt = leaf_moves.size();
-                // cnt = tmp.moves().size();
             } else {
                 cnt = perft_<false>(tmp, depth - 1);
             }
@@ -41,14 +40,52 @@ uint64_t perft_(Board board, int depth)
     return nodes;
 }
 
+void Engine::reset()
+{
+    set(FEN_START);
+}
+
 bool Engine::set(const char *fen)
 {
     return position.set_pos(fen);
 }
 
-void Engine::reset()
+bool Engine::make_move(Move move)
 {
-    set(FEN_START);
+    bool is_legal = position.legal(move);
+
+    if (is_legal)
+        position.make_move(move);
+
+    return is_legal;
+}
+
+MoveList Engine::moves()
+{
+    MoveList list;
+
+    position.moves(list);
+
+    return list;
+}
+
+uint64_t Engine::perft(int depth)
+{
+    position.print();
+
+    clock_t begin = clock();
+
+    uint64_t all_nodes = perft_<true>(position, depth);
+
+    clock_t end = clock();
+    clock_t ticks = end - begin;
+
+    LOG("Perft to depth %d: %lu nodes visited in %f seconds \n", 
+        depth,
+        all_nodes, 
+        ticks / (double) CLOCKS_PER_SEC);
+
+    return nodes;
 }
 
 Move Engine::search(int depth)
@@ -119,30 +156,4 @@ Score Engine::evaluate(Board &board)
     score -= 200 * cnt(board.kings()   & board.pieces[BLACK]);
 
     return score - (score * 2 * board.side);
-}
-
-MoveList Engine::moves()
-{
-    MoveList list;
-
-    position.moves(list);
-
-    return list;
-}
-
-uint64_t Engine::perft(int depth)
-{
-    clock_t begin = clock();
-
-    uint64_t all_nodes = perft_<true>(position, depth);
-
-    clock_t end = clock();
-    clock_t ticks = end - begin;
-
-    LOG("Perft to depth [%d]: %lu nodes visited in %f seconds \n", 
-        depth,
-        all_nodes, 
-        ticks / (double) CLOCKS_PER_SEC);
-
-    return nodes;
 }

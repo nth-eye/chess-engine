@@ -5,10 +5,13 @@
 #include <cstdio>
 
 #define LOG     printf
+#define DEBUG   true
 
-#if !defined(LOG)
+#if !defined(LOG) || !DEBUG
 #define LOG(...)
+#if DEBUG
 #warning "To enable printing define LOG as output mechanisms";
+#endif
 #endif
 
 constexpr void print_sq(Square s)

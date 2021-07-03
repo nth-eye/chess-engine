@@ -1,17 +1,19 @@
 #ifndef UCI_H
 #define UCI_H
 
-#include "engine.h"
+void uci_loop();
 
-struct UCI {
-
-    void loop();
-    Move move(const char *c);
-
-    Engine engine;
-};
-
-void quit();
+void uci_uci();
+void uci_debug();
+void uci_isready();
+void uci_setoption();
+void uci_register();
+void uci_ucinewgame();
+void uci_position();
+void uci_go();
+void uci_stop();
+void uci_ponderhit();
+void uci_quit();
 
 void id();
 void uciok();

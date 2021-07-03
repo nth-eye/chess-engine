@@ -18,6 +18,7 @@ struct Board {
     bool attacked(Square s) const;
     template<Color Side>    
     bool legal(Move move) const;
+    bool legal(Move move) const;
     template<Color Side>    
     void moves_all(MoveList &list) const;
     template<Color Side, bool Pinned> 

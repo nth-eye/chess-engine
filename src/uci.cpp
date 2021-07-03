@@ -1,6 +1,7 @@
 #include <cstring>
 #include <cstdlib>
 #include "uci.h"
+#include "engine.h"
 #include "log.h"
 
 #define VERSION "1.0"
@@ -13,12 +14,24 @@ struct UCI_Cmd {
     const uci_cb    cb; 
 };
 
+static const UCI_Cmd UCI_COMMANDS[] = {
+    { "uci",        uci_uci },
+    { "debug",      uci_debug },
+    { "isready",    uci_isready },
+    { "setoption",  uci_setoption },
+    { "register",   uci_register },
+    { "ucinewgame", uci_ucinewgame },
+    { "position",   uci_position },
+    { "go",         uci_go },
+    { "stop",       uci_stop },
+    { "ponderhit",  uci_ponderhit },
+    { "quit",       uci_quit },
+};
+
 static char line[1024];
 static char *words[512];
-
-static const UCI_Cmd UCI_COMMANDS[] = {
-    { "quit", quit },
-};
+static Engine engine;
+static size_t cmd_words;
 
 // Splits string by given delimiter and saves pointers to "ptr_arr". Modifies string.
 static size_t split(char *str, char *ptr_arr[], const char *delim, size_t max_n_lines)
@@ -35,39 +48,7 @@ static size_t split(char *str, char *ptr_arr[], const char *delim, size_t max_n_
     return i;
 }
 
-void UCI::loop() 
-{
-    engine.reset();
-
-    id();
-
-    while (fgets(line, SIZE(line), stdin)) {
-
-        line[strcspn(line, "\n")] = 0;
-
-        size_t n_words = split(line, words, " ", SIZE(words));
-
-        for (size_t i = 0; i < n_words; ++i)
-            puts(words[i]);
-
-        if (!n_words)
-            continue;
-
-        for (size_t i = 0; i < SIZE(UCI_COMMANDS); ++i) {
-
-            if (!strcmp(words[0], UCI_COMMANDS[i].str)) {
-
-                printf("found command: %s \n", UCI_COMMANDS[i].str);
-
-                UCI_COMMANDS[i].cb();
-            } else {
-                printf("unkown command: %s \n", words[0]);
-            }
-        }
-    }
-}
-
-Move UCI::move(const char *c)
+static Move str_to_move(const char *c)
 {
     Square src = sq(Rank(c[1] - '1'), File(c[0] - 'a'));
     Square dst = sq(Rank(c[3] - '1'), File(c[2] - 'a'));
@@ -101,10 +82,157 @@ Move UCI::move(const char *c)
     return NULL_MOVE;
 }
 
-void quit()
+static bool parse_moves(size_t token_idx)
+{
+    LOG("<%s>: tokens [%lu] - [%lu] \n", __func__, token_idx, cmd_words);
+
+    for (size_t i = token_idx; i < cmd_words; ++i) {
+
+        Move move = str_to_move(words[i]);
+
+        if (move == NULL_MOVE) {
+            LOG("<%s>: failure - got illegal move [%s] \n", __func__, words[i]);
+            return false;
+        }
+
+        engine.make_move(move);
+    }
+    return true;
+}
+
+void uci_loop() 
+{
+    engine.reset();
+
+    while (fgets(line, SIZE(line), stdin)) {
+
+        line[strcspn(line, "\n")] = 0;
+
+        cmd_words = split(line, words, " ", SIZE(words));
+
+        if (!cmd_words)
+            continue;
+        
+        size_t cmd = 0;
+
+        for (; cmd < SIZE(UCI_COMMANDS); ++cmd) {
+
+            if (!strcmp(words[0], UCI_COMMANDS[cmd].str)) {
+
+                LOG("<%s>: success - [%s] \n", __func__, UCI_COMMANDS[cmd].str);
+
+                UCI_COMMANDS[cmd].cb();
+
+                break;
+            }
+        }
+
+        if (cmd >= SIZE(UCI_COMMANDS))
+            LOG("<%s>: failure - [%s] \n", __func__, words[0]);
+    }
+}
+
+// SECTION GUI to Engine
+
+void uci_uci()
+{
+    id();
+    // all_options();
+    uciok();
+}
+
+void uci_debug()
+{
+
+}
+
+void uci_isready()
+{
+
+}
+
+void uci_setoption()
+{
+
+}
+
+void uci_register()
+{
+
+}
+
+void uci_ucinewgame()
+{
+
+}
+
+void uci_position()
+{
+    if (cmd_words < 2) {
+        LOG("<%s>: failure - too few arguments \n", __func__);
+        return;
+    }
+
+    size_t moves_token = 0;
+    
+    if (!strcmp(words[1], "startpos")) {
+
+        // position startpos moves e2e4 e7e5
+
+        engine.reset();
+
+        if (cmd_words > 3 && !strcmp(words[2], "moves"))
+            moves_token = 3;
+
+    } else if (cmd_words > 7 && !strcmp(words[1], "fen")) {
+
+        // position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 moves e2e4 e7e5
+
+        for (size_t i = 3; i < 8; ++i)
+            *(words[i] - 1) = ' ';
+
+        if (!engine.set(words[2])) {
+            LOG("<%s>: failure - incorrect fen \n", __func__);
+            return;
+        }
+
+        if (cmd_words > 9 && !strcmp(words[8], "moves"))
+            moves_token = 9;
+
+    } else {
+        LOG("<%s>: failure - too few arguments \n", __func__);
+        return;
+    }
+
+    if (moves_token)
+        parse_moves(moves_token);
+
+    engine.perft(1);
+}
+
+void uci_go()
+{
+
+}
+
+void uci_stop()
+{
+
+}
+
+void uci_ponderhit()
+{
+
+}
+
+void uci_quit()
 {
     exit(0);
 }
+
+// !SECTION GUI to Engine
+
+// SECTION Engine to GUI
 
 void id()
 {
@@ -120,3 +248,5 @@ void readyok()
 {
     puts("readyok");
 }
+
+// !SECTION Engine to GUI
