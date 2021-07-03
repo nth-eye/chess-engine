@@ -36,7 +36,7 @@ constexpr auto K_ATTACKS    = attacks<KING  >();
 const auto B_ATTACKS        = attacks_magic<BISHOP>(B_MAGIC_NUM);
 const auto R_ATTACKS        = attacks_magic<ROOK  >(R_MAGIC_NUM);
 
-static bool str_to_int(const char *str, long *val, int base, char **end)
+bool str_to_int(const char *str, long *val, int base, char **end)
 {
     long res = strtol(str, end, base);
 

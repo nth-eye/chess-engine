@@ -1,6 +1,8 @@
 #ifndef MISC_H
 #define MISC_H
 
+#include "defs.h"
+
 #define ENABLE_INC(T)       \
 constexpr T& operator++(T &t)       { return t = T(t + 1); }        \
 constexpr T& operator--(T &t)       { return t = T(t - 1); }        \

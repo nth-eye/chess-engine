@@ -212,7 +212,27 @@ void uci_position()
 
 void uci_go()
 {
+    if (cmd_words < 2) {
+        LOG("<%s>: failure - too few arguments \n", __func__);
+        return;
+    }
 
+    Move best_move = NULL_MOVE;
+
+    if (cmd_words > 2 && !strcmp(words[1], "depth")) {
+
+        long depth = 0;
+        char *end = NULL;
+
+        if (str_to_int(words[2], &depth, 10, &end) && depth <= MAX_DEPTH)
+            best_move = engine.search(depth);
+        else
+            LOG("<%s>: failure - illegal depth - [%s] \n", __func__, words[2]);
+    }
+    
+    LOG("<%s>: success - best move [", __func__);
+    print_mv(best_move);
+    LOG("] \n");
 }
 
 void uci_stop()

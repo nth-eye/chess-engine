@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <cstddef>
-#include <vector>
 
 using Bitboard  = uint64_t;
 using Move      = uint16_t;

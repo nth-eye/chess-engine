@@ -3,6 +3,7 @@
 #include "log.h"
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 void test_perft(const char *file_name)
 {

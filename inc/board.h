@@ -7,6 +7,8 @@
 constexpr auto FEN_EMPTY    = "8/8/8/8/8/8/8/8 w - - 0 1";
 constexpr auto FEN_START    = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
+bool str_to_int(const char *str, long *val, int base, char **end);
+
 struct Board {
 
     constexpr Board() = default;
