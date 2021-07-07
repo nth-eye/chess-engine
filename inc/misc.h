@@ -1,7 +1,10 @@
 #ifndef MISC_H
 #define MISC_H
 
+#include <cstring>
 #include "defs.h"
+
+#define SIZE(x) (sizeof(x) / sizeof(x[0]))
 
 #define ENABLE_INC(T)       \
 constexpr T& operator++(T &t)       { return t = T(t + 1); }        \
@@ -69,5 +72,20 @@ constexpr bool same_diag(Square s1, Square s2)
 constexpr char file_c(File f)               { return 'a' + f; }
 constexpr char rank_c(Rank r)               { return '1' + r; }
 constexpr char side_c(Color c)              { return c == WHITE ? 'w' : 'b'; }
+
+// Splits string by given delimiter and saves pointers to "ptr_arr". Modifies string.
+inline size_t split(char *str, char *ptr_arr[], const char *delim, size_t max_n_lines)
+{  
+    char *split = strtok(str, delim);
+    size_t i = 0;
+
+    while (split && i < max_n_lines) {
+        ptr_arr[i++] = split;
+        split = strtok(NULL, delim);
+    }
+    ptr_arr[i] = 0;
+
+    return i;
+}
 
 #endif // MISC_H

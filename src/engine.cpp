@@ -85,7 +85,7 @@ uint64_t Engine::perft(int depth)
         all_nodes, 
         ticks / (double) CLOCKS_PER_SEC);
 
-    return nodes;
+    return all_nodes;
 }
 
 Move Engine::search(int depth)

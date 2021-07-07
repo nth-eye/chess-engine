@@ -5,7 +5,7 @@
 #include <cstdio>
 
 #define LOG     printf
-#define DEBUG   true
+#define DEBUG   false
 
 #if !defined(LOG) || !DEBUG
 #define LOG(...)

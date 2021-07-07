@@ -3,7 +3,7 @@
 
 int main(int, char**) 
 {
-    uci_loop(); 
+    // uci_loop(); 
 
-    // test_perft("../perft.txt");
+    test_perft("../perft.txt", 4);
 }

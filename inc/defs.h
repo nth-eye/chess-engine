@@ -8,7 +8,7 @@ using Bitboard  = uint64_t;
 using Move      = uint16_t;
 using Score     = int;
 
-enum Piece  { EMPTY, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, PIECE_num };
+enum Piece  { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, PIECE_num };
 enum File   { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_num };
 enum Rank   { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_num };
 enum Color  : uint_fast8_t { WHITE, BLACK, COLOR_num };
@@ -37,8 +37,8 @@ enum Castle : uint_fast8_t {
     CASTLE_num,
 };
 enum Direction {
-    NORTH       =  8,
-    EAST        =  1,
+    NORTH       = 8,
+    EAST        = 1,
     SOUTH       = -NORTH,
     WEST        = -EAST,
     NORTH_EAST  = NORTH + EAST,

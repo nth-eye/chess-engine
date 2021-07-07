@@ -15,7 +15,6 @@ struct Engine {
     uint64_t perft(int depth);
 private:
     Score alphabeta(Board &board, Score alpha, Score beta, int depth);
-    Score negamax(Board &board, int depth);
     Score evaluate(Board &board);
     
     Board position;

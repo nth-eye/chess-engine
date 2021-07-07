@@ -2,12 +2,34 @@
 #define BOARD_H
 
 #include "bitboard.h"
-#include "move_list.h"
 
 constexpr auto FEN_EMPTY    = "8/8/8/8/8/8/8/8 w - - 0 1";
 constexpr auto FEN_START    = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+constexpr auto MAX_MOVES    = 412;
+constexpr Move NULL_MOVE    = 0;
 
 bool str_to_int(const char *str, long *val, int base, char **end);
+
+struct MoveList {
+    constexpr const Move* begin() const { return &list[0]; }
+    constexpr const Move* end() const   { return &list[len]; }
+    constexpr Move* begin()             { return &list[0]; }
+    constexpr Move* end()               { return &list[len]; }
+    constexpr size_t size() const       { return len; }
+    constexpr void erase(size_t idx)    { list[idx] = list[--len]; }
+    constexpr void save(Move m)         { list[len++] = m; }
+    constexpr void save(Square src, Square dst)           
+    { 
+        save(mv(src, dst)); 
+    }
+    constexpr void save(Square src, Square dst, MoveFlag flag)           
+    { 
+        save(mv(src, dst, flag)); 
+    }
+private:
+    Move list[MAX_MOVES];
+    size_t len = 0;
+};
 
 struct Board {
 

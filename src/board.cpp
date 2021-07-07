@@ -195,22 +195,22 @@ bool Board::set_pos(const char *c)
     ++c;
 
     if (*c++ != ' ')
-        return false;
+        return true;
 
     long val;
     char *end = NULL;
 
     if (!str_to_int(c, &val, 10, &end) || val >= 100)
-        return false; 
+        return true; 
     half_clk = val;
 
     c = end;
 
     if (*c++ != ' ')
-        return false;
+        return true;
 
     if (!str_to_int(c, &val, 10, &end) || val < 1)
-        return false; 
+        return true; 
     full_clk = (val - 1) * 2 + side;
 
     if (strlen(end))

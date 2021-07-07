@@ -5,7 +5,6 @@
 #include "log.h"
 
 #define VERSION "1.0"
-#define SIZE(x) (sizeof(x) / sizeof(x[0]))
 
 using uci_cb = void(*)();
 
@@ -32,21 +31,6 @@ static char line[1024];
 static char *words[512];
 static Engine engine;
 static size_t cmd_words;
-
-// Splits string by given delimiter and saves pointers to "ptr_arr". Modifies string.
-static size_t split(char *str, char *ptr_arr[], const char *delim, size_t max_n_lines)
-{  
-    char *split = strtok(str, delim);
-    size_t i = 0;
-
-    while (split && i < max_n_lines) {
-        ptr_arr[i++] = split;
-        split = strtok(NULL, delim);
-    }
-    ptr_arr[i] = 0;
-
-    return i;
-}
 
 static Move str_to_move(const char *c)
 {
@@ -218,17 +202,19 @@ void uci_go()
     }
 
     Move best_move = NULL_MOVE;
+    long depth = 0;
 
     if (cmd_words > 2 && !strcmp(words[1], "depth")) {
 
-        long depth = 0;
         char *end = NULL;
 
-        if (str_to_int(words[2], &depth, 10, &end) && depth <= MAX_DEPTH)
-            best_move = engine.search(depth);
-        else
+        if (!str_to_int(words[2], &depth, 10, &end) || depth > MAX_DEPTH)
+
             LOG("<%s>: failure - illegal depth - [%s] \n", __func__, words[2]);
+    } else {
+        depth = 6;
     }
+    best_move = engine.search(depth);
     
     LOG("<%s>: success - best move [", __func__);
     print_mv(best_move);

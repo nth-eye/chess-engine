@@ -1,43 +1,41 @@
 #include "test.h"
 #include "engine.h"
 #include "log.h"
-#include <fstream>
-#include <sstream>
-#include <vector>
+#include <cstring>
 
-void test_perft(const char *file_name)
+void test_perft(const char *file_name, size_t depth)
 {
-    constexpr int depth     = 5;
-    const char *position    = NULL;
-    uint64_t line_cnt       = 0;
-    uint64_t correct_nodes  = 0;
     Engine engine;
 
-    std::ifstream ifs{file_name};
-    std::string line;
-    std::string word;
+    uint64_t line_cnt       = 0;
+    uint64_t correct_nodes  = 0;
 
-    while (std::getline(ifs, line)) {
+    char line[256];
+    char *words[16];
+
+    FILE *fp = fopen(file_name, "r");
+
+    while (fgets(line, SIZE(line), fp)) {
 
         ++line_cnt;
 
-        printf("[%04lu]: %s \n", line_cnt, line.c_str());
+        printf("[%04lu]: %s", line_cnt, line);
 
-        std::stringstream ss{line};
-        std::vector<std::string> words;
+        size_t n_words = split(line, words, ",", SIZE(words));
 
-        while (std::getline(ss, word, ','))
-            words.push_back(word);
-
-        if (words.size() < depth + 1) {
+        if (n_words < depth + 1) {
             printf("[%04lu]: not enough arguments \n", line_cnt);
             continue;
         }
 
-        position        = words[0].c_str();
-        correct_nodes   = std::stoi(words[depth]);
+        char *end = NULL;
 
-        if (!engine.set(position)) {
+        if (!str_to_int(words[depth], (long*) &correct_nodes, 10, &end)) {
+            printf("[%04lu]: illegal number of nodes \n", line_cnt);
+            continue;
+        }
+
+        if (!engine.set(words[0])) {
             printf("[%04lu]: set_pos failed \n", line_cnt);
             continue;
         }
@@ -45,9 +43,12 @@ void test_perft(const char *file_name)
         uint64_t nodes = engine.perft(depth);
 
         if (nodes != correct_nodes) {
-            printf("[%04lu]: %lu != %lu in %s \n", line_cnt, nodes, correct_nodes, position);
+            printf("[%04lu]: %lu != %lu in %s \n", line_cnt, nodes, correct_nodes, words[0]);
+            fclose(fp);
             return;
         }
     }
-    printf("ALL TESTS successfully finished for depth %d \n", depth);
+    printf("<%s>: all tests successfully passed for depth %lu \n", __func__, depth);
+
+    fclose(fp);
 }
