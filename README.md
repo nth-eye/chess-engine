@@ -1,7 +1,7 @@
 # chess-engine
 
 Really simple C++11 chess engine with a lot of templates. Main purpose was to calculate as much as possible at compile time and 
-implement magic bitboards as minimalisticly as possible. 
+implement magic bitboards as minimalistically as possible. 
 
 **Work-in-Progress**
 
