@@ -19,4 +19,4 @@ void id();
 void uciok();
 void readyok();
 
-#endif // UCI_H
+#endif

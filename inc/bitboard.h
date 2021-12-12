@@ -287,4 +287,4 @@ constexpr auto lines()
     return bb;
 }
 
-#endif // BITBOARD_H
+#endif

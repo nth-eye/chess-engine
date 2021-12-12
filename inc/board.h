@@ -71,4 +71,4 @@ struct Board {
     uint16_t full_clk           = 0;
 };
 
-#endif // BOARD_H
+#endif

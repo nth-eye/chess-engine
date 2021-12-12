@@ -58,4 +58,4 @@ enum MoveFlag {
     ENPASS  = 0b1000'0000'0000'0000,
 };
 
-#endif // DEFS_H
+#endif

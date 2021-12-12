@@ -88,4 +88,4 @@ inline size_t split(char *str, char *ptr_arr[], const char *delim, size_t max_n_
     return i;
 }
 
-#endif // MISC_H
+#endif

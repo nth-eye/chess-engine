@@ -67,4 +67,4 @@ constexpr void print_moves(const MoveList &list)
     LOG("\n");
 }
 
-#endif // LOG_H
+#endif
