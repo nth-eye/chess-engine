@@ -1,6 +1,7 @@
 #include <climits>
 #include <ctime>
 #include "engine.h"
+#include "util.h"
 #include "log.h"
 
 template<bool Root = true>
@@ -32,10 +33,10 @@ uint64_t perft_(Board board, int depth)
             nodes += cnt;
             tmp = board;
         }
-        if (Root) {
-            print_mv(move); 
-            LOG("\t %lu \n", cnt);
-        }
+        // if (Root) {
+        //     print_mv(move); 
+        //     LOG("\t %lu \n", cnt);
+        // }
     }
     return nodes;
 }
@@ -71,7 +72,7 @@ MoveList Engine::moves()
 
 uint64_t Engine::perft(int depth)
 {
-    position.print();
+    // position.print();
 
     clock_t begin = clock();
 
@@ -105,7 +106,7 @@ Move Engine::search(int depth)
             best_move  = move;
         }
     }
-    LOG("nodes: %lu \n", nodes);
+    LOG("nodes: %lu", nodes);
     return best_move;
 }
 

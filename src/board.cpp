@@ -1,7 +1,7 @@
+#include <cstring>
 #include "board.h"
 #include "log.h"
-#include <cstring>
-#include <cstdlib>
+#include "util.h"
 
 constexpr Bitboard CASTLE_MASK[2][3] = { 
     { 0x0000000000000060, 0x000000000000000e, 0x000000000000000c }, 
@@ -36,17 +36,6 @@ constexpr auto K_ATTACKS    = attacks<KING  >();
 const auto B_ATTACKS        = attacks_magic<BISHOP>(B_MAGIC_NUM);
 const auto R_ATTACKS        = attacks_magic<ROOK  >(R_MAGIC_NUM);
 
-bool str_to_int(const char *str, long *val, int base, char **end)
-{
-    long res = strtol(str, end, base);
-
-    if (*end > str) {
-        *val = res;
-        return true;
-    }
-    return false;
-}
-
 static void add_moves(Square src, Bitboard all_dst, MoveList &list)
 {
     for (auto dst : BitIter(all_dst))
@@ -55,9 +44,9 @@ static void add_moves(Square src, Bitboard all_dst, MoveList &list)
 
 void Board::print() const
 {
-    LOG("\n");
+    OUT("\n");
     for (Rank r = RANK_8; r >= RANK_1; --r) {
-        LOG("%c   ", rank_c(r));
+        OUT("%c   ", rank_c(r));
         for (File f = FILE_A; f <= FILE_H; ++f) {
 
             Square s    = sq(r, f);
@@ -79,28 +68,28 @@ void Board::print() const
             if (get(pieces[WHITE], s)) 
                 c ^= bit(5);
 
-            LOG("%c ", c);
+            OUT("%c ", c);
         }
-        LOG("\n");
+        OUT("\n");
     }
-    LOG("\n   ");
+    OUT("\n   ");
     for (File f = FILE_A; f <= FILE_H; ++f)
-        LOG(" %c", file_c(f));
-    LOG("\n\n");
-    LOG("cast:  %c%c%c%c    \n", 
+        OUT(" %c", file_c(f));
+    OUT("\n\n");
+    OUT("cast:  %c%c%c%c    \n", 
         castle & WKCA ? 'K' : '-', castle & WQCA ? 'Q' : '-', 
         castle & BKCA ? 'k' : '-', castle & BQCA ? 'q' : '-');
-    LOG("enps:  ");
+    OUT("enps:  ");
     if (enps_sq)
         print_sq(enps_sq);
     else
-        LOG("-");
-    LOG("\n");
-    LOG("half:  %u          \n", half_clk);
-    LOG("full:  %u          \n", full_clk);
-    LOG("side:  %c          \n", side_c(side));
-    LOG("size:  %lu bytes   \n", sizeof(Board));
-    LOG("\n");
+        OUT("-");
+    OUT("\n");
+    OUT("half:  %u          \n", half_clk);
+    OUT("full:  %u          \n", full_clk);
+    OUT("side:  %c          \n", side_c(side));
+    OUT("size:  %lu bytes   \n", sizeof(Board));
+    OUT("\n");
 }
 
 void Board::clr_pos()
@@ -110,7 +99,7 @@ void Board::clr_pos()
 
 bool Board::set_pos(const char *c)
 {
-    LOG("<%s>: %s \n", __func__, c);
+    LOG("%s", c);
 
     clr_pos();
 
@@ -214,7 +203,7 @@ bool Board::set_pos(const char *c)
     full_clk = (val - 1) * 2 + side;
 
     if (strlen(end))
-        LOG("<%s>: remainder - [%s] \n", __func__, end);
+        LOG("remainder - [%s]", end);
 
     return true;
 }

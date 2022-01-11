@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include "uci.h"
 #include "engine.h"
+#include "util.h"
 #include "log.h"
 
 #define VERSION "1.0"
@@ -68,14 +69,14 @@ static Move str_to_move(const char *c)
 
 static bool parse_moves(size_t token_idx)
 {
-    LOG("<%s>: tokens [%lu] - [%lu] \n", __func__, token_idx, cmd_words);
+    OUT("<%s>: tokens [%lu] - [%lu] \n", __func__, token_idx, cmd_words);
 
     for (size_t i = token_idx; i < cmd_words; ++i) {
 
         Move move = str_to_move(words[i]);
 
         if (move == NULL_MOVE) {
-            LOG("<%s>: failure - got illegal move [%s] \n", __func__, words[i]);
+            OUT("<%s>: failure - got illegal move [%s] \n", __func__, words[i]);
             return false;
         }
 
@@ -103,7 +104,7 @@ void uci_loop()
 
             if (!strcmp(words[0], UCI_COMMANDS[cmd].str)) {
 
-                LOG("<%s>: success - [%s] \n", __func__, UCI_COMMANDS[cmd].str);
+                OUT("<%s>: success - [%s] \n", __func__, UCI_COMMANDS[cmd].str);
 
                 UCI_COMMANDS[cmd].cb();
 
@@ -112,7 +113,7 @@ void uci_loop()
         }
 
         if (cmd >= SIZE(UCI_COMMANDS))
-            LOG("<%s>: failure - [%s] \n", __func__, words[0]);
+            OUT("<%s>: failure - [%s] \n", __func__, words[0]);
     }
 }
 
@@ -153,7 +154,7 @@ void uci_ucinewgame()
 void uci_position()
 {
     if (cmd_words < 2) {
-        LOG("<%s>: failure - too few arguments \n", __func__);
+        OUT("<%s>: failure - too few arguments \n", __func__);
         return;
     }
 
@@ -176,7 +177,7 @@ void uci_position()
             *(words[i] - 1) = ' ';
 
         if (!engine.set(words[2])) {
-            LOG("<%s>: failure - incorrect fen \n", __func__);
+            OUT("<%s>: failure - incorrect fen \n", __func__);
             return;
         }
 
@@ -184,7 +185,7 @@ void uci_position()
             moves_token = 9;
 
     } else {
-        LOG("<%s>: failure - too few arguments \n", __func__);
+        OUT("<%s>: failure - too few arguments \n", __func__);
         return;
     }
 
@@ -197,7 +198,7 @@ void uci_position()
 void uci_go()
 {
     if (cmd_words < 2) {
-        LOG("<%s>: failure - too few arguments \n", __func__);
+        OUT("<%s>: failure - too few arguments \n", __func__);
         return;
     }
 
@@ -210,15 +211,15 @@ void uci_go()
 
         if (!str_to_int(words[2], &depth, 10, &end) || depth > MAX_DEPTH)
 
-            LOG("<%s>: failure - illegal depth - [%s] \n", __func__, words[2]);
+            OUT("<%s>: failure - illegal depth - [%s] \n", __func__, words[2]);
     } else {
         depth = 6;
     }
     best_move = engine.search(depth);
     
-    LOG("<%s>: success - best move [", __func__);
+    OUT("<%s>: success - best move [", __func__);
     print_mv(best_move);
-    LOG("] \n");
+    OUT("] \n");
 }
 
 void uci_stop()

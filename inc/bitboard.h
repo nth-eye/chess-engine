@@ -1,9 +1,8 @@
 #ifndef BITBOARD_H
 #define BITBOARD_H
 
-#include "defs.h"
-#include "misc.h"
 #include <array>
+#include "defs.h"
 
 struct BitIter {
 
@@ -77,9 +76,18 @@ constexpr Bitboard RANK_BB  = 0x00000000000000ffULL;
 constexpr Bitboard FILE_BB  = 0x0101010101010101ULL;
 
 constexpr Bitboard rank_bb(Rank r)          { return RANK_BB << (8 * r); }
-constexpr Bitboard rank_bb(Square s)        { return rank_bb(rank(s)); }
 constexpr Bitboard file_bb(File f)          { return FILE_BB << f; }
-constexpr Bitboard file_bb(Square s)        { return file_bb(file(s)); }
+
+constexpr bool same_line(Square s1, Square s2)
+{
+    return rank(s1) == rank(s2) || file(s1) == file(s2);
+}
+
+constexpr bool same_diag(Square s1, Square s2)
+{
+    return  (rank(s2) - rank(s1)) == (file(s2) - file(s1)) ||
+            (rank(s2) - rank(s1)) +  (file(s2) - file(s1)) == 0;
+}
 
 constexpr Bitboard shift(Bitboard b, Direction d)
 {
@@ -135,8 +143,8 @@ template<Piece P>
 constexpr Bitboard attacks_mask(Square s)
 {
     Bitboard edges = 
-        ((rank_bb(RANK_1) | rank_bb(RANK_8)) & ~rank_bb(s)) | 
-        ((file_bb(FILE_A) | file_bb(FILE_H)) & ~file_bb(s));
+        ((rank_bb(RANK_1) | rank_bb(RANK_8)) & ~rank_bb(rank(s))) | 
+        ((file_bb(FILE_A) | file_bb(FILE_H)) & ~file_bb(file(s)));
     return attacks_sliding<P>(s, 0) & ~edges;
 }
 
@@ -287,4 +295,4 @@ constexpr auto lines()
     return bb;
 }
 
-#endif // BITBOARD_H
+#endif

@@ -1,5 +1,5 @@
 #include "uci.h"
-#include "test.h"
+#include "util.h"
 
 int main(int, char**) 
 {

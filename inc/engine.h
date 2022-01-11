@@ -3,8 +3,6 @@
 
 #include "board.h"
 
-constexpr int MAX_DEPTH = 32;
-
 struct Engine {
 
     void reset();
@@ -21,4 +19,4 @@ private:
     uint64_t nodes;
 };
 
-#endif // ENGINE_H
+#endif

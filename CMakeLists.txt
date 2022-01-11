@@ -3,7 +3,7 @@ project(chess VERSION 0.1.0)
 
 include_directories(inc)
 file(GLOB SRC_FILES src/*.cpp)
-add_executable(chess main.cpp ${SRC_FILES}) 
+add_executable(chess main.cpp ${SRC_FILES})
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wcpp -Wno-implicit-fallthrough -O3")
 set(CMAKE_CXX_STANDARD 11)
