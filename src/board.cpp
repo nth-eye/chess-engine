@@ -202,8 +202,9 @@ bool Board::set_pos(const char *c)
         return true; 
     full_clk = (val - 1) * 2 + side;
 
-    if (strlen(end))
+    if (strlen(end)) {
         LOG("remainder - [%s]", end);
+    }
 
     return true;
 }
