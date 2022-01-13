@@ -9,6 +9,7 @@
 namespace moon {
 
 constexpr Bitboard bit(int i)               { return 1ul << i; }
+constexpr Bitboard bit(int i, auto... more) { return bit(i) | bit(more...); } 
 constexpr auto file(Square s)               { return File(s & 7); }
 constexpr auto rank(Square s)               { return Rank(s >> 3); }
 constexpr auto sq(Rank r, File f)           { return Square((r << 3) + f); }
@@ -29,27 +30,36 @@ constexpr auto cnt(Bitboard bb)
 }
 constexpr auto lsb(Bitboard bb)
 { 
-    return Square(cnt((bb & -bb) - 1));  
+    return cnt((bb & -bb) - 1);  
 }
 #endif
 
 template<class T, T Head, T Tail>
 struct EnumIter {
-
     constexpr EnumIter() = default;
     constexpr EnumIter(int val) : val{val} {}
-
     constexpr EnumIter begin()  { return Head; }
     constexpr EnumIter end()    { return Tail + 1; }
-
     constexpr bool  operator!=(const EnumIter &i) const { return val != i.val; }
+    constexpr auto  operator*() const                   { return T(val); }
     constexpr void  operator++()                        { ++val; }
-    constexpr T     operator*() const                   { return T(val); }
-private:
+protected:
     int val = Head;
 };
 
-using Squares = EnumIter<Square, A1, H8>;
+template<class T, T Head, T Tail>
+struct EnumIterRev : EnumIter<T, Tail, Head> {
+    constexpr EnumIterRev() = default;
+    constexpr EnumIterRev(int val) : EnumIter<T, Tail, Head>{val} {}
+    constexpr EnumIterRev begin()   { return Tail; }
+    constexpr EnumIterRev end()     { return Head - 1; }
+    constexpr void operator++()     { --this->val; }
+};
+
+using Squares   = EnumIter<Square, A1, H8>;
+using Files     = EnumIter<File, FILE_A, FILE_H>;
+using Ranks     = EnumIter<Rank, RANK_1, RANK_8>;
+using RanksRev  = EnumIterRev<Rank, RANK_1, RANK_8>;
 
 }
 

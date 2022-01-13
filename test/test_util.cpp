@@ -11,6 +11,14 @@ TEST(Util, Bit)
     EXPECT_EQ(bit(63), 0x80000000'00000000);
 }
 
+TEST(Util, BitPack)
+{
+    EXPECT_EQ(bit(A1, A2, B1, B2), 0x0303);
+    EXPECT_EQ(bit(A1, A1), 0x01);
+    EXPECT_EQ(bit(A7, D7, E7, F7, G7, A6, D6, A5, D5, A4, B4, C4, D4, E4, F4, G4, D3, G3, D2, G2, A1, B1, C1, D1, G1), 
+        0x007909097f48484f);
+}
+
 TEST(Util, BitGet)
 {
     Bitboard bb = 0x80000000'00000201;
@@ -47,12 +55,20 @@ TEST(Util, BitClear)
 
 TEST(Util, BitCount)
 {
-    // TODO
+    EXPECT_EQ(cnt(0x00000000'00000000), 0);
+    EXPECT_EQ(cnt(0x00000000'00000001), 1);
+    EXPECT_EQ(cnt(0x00110010'10010101), 7);
+    EXPECT_EQ(cnt(0x80000001'80000001), 4);
+    EXPECT_EQ(cnt(0xffffffff'ffffffff), 64);
 }
 
 TEST(Util, BitLeastSignificant)
 {
-    // TODO
+    EXPECT_EQ(lsb(0x00000000'00000000), 64);
+    EXPECT_EQ(lsb(0x00000000'00000001), 0);
+    EXPECT_EQ(lsb(0x00000000'00000002), 1);
+    EXPECT_EQ(lsb(0x00110010'10000000), 28);
+    EXPECT_EQ(lsb(0x80000000'00000000), 63);
 }
 
 TEST(Util, File)
@@ -89,4 +105,19 @@ TEST(Util, Square)
     EXPECT_EQ(sq(RANK_1, FILE_H), H1);
     EXPECT_EQ(sq(RANK_8, FILE_A), A8);
     EXPECT_EQ(sq(RANK_8, FILE_H), H8);
+}
+
+TEST(Util, EnumIterators)
+{
+    EXPECT_EQ(*Squares().begin(), A1);
+    EXPECT_EQ(*Squares().end(), H8 + 1);
+
+    EXPECT_EQ(*Files().begin(), FILE_A);
+    EXPECT_EQ(*Files().end(), FILE_H + 1);
+
+    EXPECT_EQ(*Ranks().begin(), RANK_1);
+    EXPECT_EQ(*Ranks().end(), RANK_8 + 1);
+
+    EXPECT_EQ(*RanksRev().begin(), RANK_8);
+    EXPECT_EQ(*RanksRev().end(), RANK_1 - 1);
 }

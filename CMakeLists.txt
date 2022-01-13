@@ -5,7 +5,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wcpp -Wno-implicit-fallthrough -O
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION}) 
+set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 
 include_directories(inc)
 file(GLOB SRC_FILES src/*.cpp)

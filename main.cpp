@@ -24,8 +24,8 @@ int main(int, char**)
 
     // test_perft("../perft.txt", 4);
 
-    for (auto sq : Squares())
-        printf("%d \n", sq);
+    // for (auto sq : RanksRev())
+    //     printf("%d \n", sq);
 
     // printf("1: %lu clock_t \n", measure_time<100000000>(check_1));
     // printf("1: %lu clock_t \n", measure_time<100000000>(check_1));
