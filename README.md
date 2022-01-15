@@ -1,13 +1,13 @@
 # chess-engine
 
-Really simple C++ chess engine with a lot of templates. Main purpose is to calculate as much as possible at compile time and 
-implement magic bitboards as minimalistically as possible. 
+Really simple C++20 chess engine with a lot of templates. Main purpose is to calculate as much as possible at compile 
+time and implement magic bitboards as minimalistically as possible. 
 
 **Work-in-Progress**
 
 ## TODO
 
-- [ ] Tests: util
+- [x] Tests: util
 - [ ] Tests: bitboard
 - [ ] Old todos:
     - [ ] Optimize movegen

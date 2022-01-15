@@ -83,5 +83,71 @@ TEST(Bitboard, ShiftMany)
 
 TEST(Bitboard, ShiftPack)
 {
-    
+    auto bb = bit(C3);
+
+    EXPECT_EQ(shift(bb, NORTH, EAST, SOUTH, WEST), bit(C4, D3, C2, B3));
+    EXPECT_EQ(shift(bb, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST), bit(D4, B4, D2, B2)); 
+}
+
+TEST(Bitboard, SlidingAttacksNoBlock)
+{
+    EXPECT_EQ(attacks_sliding(ROOK, A1, 0), bit(A2, A3, A4, A5, A6, A7, A8, B1, C1, D1, E1, F1, G1, H1));
+    EXPECT_EQ(attacks_sliding(ROOK, G1, 0), bit(G2, G3, G4, G5, G6, G7, G8, A1, B1, C1, D1, E1, F1, H1));
+    EXPECT_EQ(attacks_sliding(ROOK, H8, 0), bit(H1, H2, H3, H4, H5, H6, H7, A8, B8, C8, D8, E8, F8, G8));
+    EXPECT_EQ(attacks_sliding(ROOK, B8, 0), bit(B1, B2, B3, B4, B5, B6, B7, A8, C8, D8, E8, F8, G8, H8));
+    EXPECT_EQ(attacks_sliding(ROOK, D4, 0), bit(D1, D2, D3, D5, D6, D7, D8, A4, B4, C4, E4, F4, G4, H4));
+
+    EXPECT_EQ(attacks_sliding(BISHOP, A1, 0), bit(B2, C3, D4, E5, F6, G7, H8));
+    EXPECT_EQ(attacks_sliding(BISHOP, G1, 0), bit(H2, F2, E3, D4, C5, B6, A7));
+    EXPECT_EQ(attacks_sliding(BISHOP, H8, 0), bit(A1, B2, C3, D4, E5, F6, G7));
+    EXPECT_EQ(attacks_sliding(BISHOP, B8, 0), bit(A7, C7, D6, E5, F4, G3, H2));
+    EXPECT_EQ(attacks_sliding(BISHOP, D4, 0), bit(A1, B2, C3, E5, F6, G7, H8, A7, B6, C5, E3, F2, G1));
+}
+
+TEST(Bitboard, PawnAttacks)
+{
+    auto att = std::array { 
+        attacks(PAWN, WHITE), 
+        attacks(PAWN, BLACK) 
+    };
+
+    EXPECT_EQ(att[WHITE][A7], bit(B8));
+    EXPECT_EQ(att[WHITE][B7], bit(A8, C8));
+    EXPECT_EQ(att[WHITE][H7], bit(G8));
+    EXPECT_EQ(att[WHITE][H8], 0);
+
+    EXPECT_EQ(att[BLACK][A2], bit(B1));
+    EXPECT_EQ(att[BLACK][B2], bit(A1, C1));
+    EXPECT_EQ(att[BLACK][H2], bit(G1));
+    EXPECT_EQ(att[BLACK][H1], 0);
+}
+
+TEST(Bitboard, KnightAttacks)
+{
+    auto att = attacks(KNIGHT);
+
+    EXPECT_EQ(att[A1], bit(B3, C2));
+    EXPECT_EQ(att[B1], bit(A3, C3, D2));
+    EXPECT_EQ(att[C1], bit(A2, B3, D3, E2));
+    EXPECT_EQ(att[G1], bit(E2, F3, H3));
+    EXPECT_EQ(att[H1], bit(F2, G3));
+    EXPECT_EQ(att[A8], bit(B6, C7));
+    EXPECT_EQ(att[B8], bit(A6, C6, D7));
+    EXPECT_EQ(att[C8], bit(A7, B6, D6, E7));
+    EXPECT_EQ(att[G8], bit(E7, F6, H6));
+    EXPECT_EQ(att[H8], bit(F7, G6));
+    EXPECT_EQ(att[C3], bit(A2, A4, B5, D5, E4, E2, D1, B1));
+}
+
+TEST(Bitboard, KingAttacks)
+{
+    auto att = attacks(KING);
+
+    EXPECT_EQ(att[A1], bit(A2, B2, B1));
+    EXPECT_EQ(att[B1], bit(A1, A2, B2, C2, C1));
+    EXPECT_EQ(att[A2], bit(A3, B3, B2, B1, A1));
+    EXPECT_EQ(att[B2], bit(A1, A2, A3, B3, C3, C2, C1, B1));
+    EXPECT_EQ(att[H2], bit(H3, G3, G2, G1, H1));
+    EXPECT_EQ(att[G1], bit(F1, F2, G2, H2, H1));
+    EXPECT_EQ(att[H1], bit(G1, G2, H2));
 }

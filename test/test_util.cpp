@@ -107,6 +107,25 @@ TEST(Util, Square)
     EXPECT_EQ(sq(RANK_8, FILE_H), H8);
 }
 
+TEST(Util, BitIterator)
+{
+    auto bb = bit(A1, B2, C3, D4, E5, F6, G7, H8);
+    auto head = BitIter(bb).begin();
+    auto tail = BitIter(bb).end();
+
+    ASSERT_EQ(*head, A1);
+    ASSERT_EQ(*tail, 64);
+
+    ++head; EXPECT_EQ(*head, B2);
+    ++head; EXPECT_EQ(*head, C3);
+    ++head; EXPECT_EQ(*head, D4);
+    ++head; EXPECT_EQ(*head, E5);
+    ++head; EXPECT_EQ(*head, F6);
+    ++head; EXPECT_EQ(*head, G7);
+    ++head; EXPECT_EQ(*head, H8);
+    ++head; EXPECT_EQ(*head, *tail);
+}
+
 TEST(Util, EnumIterators)
 {
     EXPECT_EQ(*Squares().begin(), A1);
