@@ -20,6 +20,7 @@ enable_testing()
 file(GLOB TEST_FILES test/*.cpp) 
 add_executable(chess_test ${TEST_FILES} 
     # ${SRC_FILES}
+    src/moon_board.cpp
 )
 target_link_libraries(chess_test gtest_main)
 include(GoogleTest)

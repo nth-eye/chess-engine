@@ -1,17 +1,22 @@
 #ifndef MOON_BITBOARD_H
 #define MOON_BITBOARD_H
 
+#include <array>
+#include <cassert>
 #include "moon_util.h"
 
 namespace moon {
 
+struct MagicInit {
+    Bitboard num;
+    int idx;
+};
+
 template<Piece P>
-struct BlackMagic {
-    constexpr BlackMagic() = default;
-    constexpr operator[](Bitboard block) const 
-    { 
-        return att[((block | mask) * magic) >> shift];
-    }
+struct Magic {
+    constexpr Magic() = default;
+    constexpr auto operator[](Bitboard occ) const   { return att[idx(occ)]; }
+    constexpr auto idx(Bitboard occ) const          { return ((occ & mask) * magic) >> shift; }
     Bitboard mask   = 0;
     Bitboard magic  = 0;
     Bitboard *att   = nullptr;
@@ -55,9 +60,8 @@ constexpr auto attacks_sliding(Piece p, Square s, Bitboard block)
     {
         auto dst = bit(s);
         do {
-            dst  = shift(dst, d);
-            att |= dst;
-        } while (dst && (dst & block) == 0);
+            att |= dst = shift(dst, d);
+        } while (dst && !(dst & block));
     }
     return att;
 }
@@ -85,10 +89,6 @@ constexpr auto attacks(Piece p, Color c = WHITE)
                     std::array{ SOUTH, SOUTH, EAST },
                     std::array{ SOUTH, SOUTH, WEST });
                 break;
-            case BISHOP: att[s]  = attacks_sliding(BISHOP, s, 0); break;
-            case QUEEN:  att[s]  = attacks_sliding(BISHOP, s, 0);
-            case ROOK:   att[s] |= attacks_sliding(ROOK,   s, 0); break;
-                break;
             case KING:
                 att[s] = shift(bb, NORTH, EAST, SOUTH, WEST, NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST);   
                 break;
@@ -98,59 +98,30 @@ constexpr auto attacks(Piece p, Color c = WHITE)
     return att;
 }
 
-// constexpr auto attacks_occupancy(Bitboard idx, Bitboard mask)
-// {
-//     int n = 0;
-//     Bitboard occ = 0;
-//     for (auto b : BitIter(mask)) {
-//         if (bit(n++) & idx)
-//             set(occ, b);
-//     }
-//     return occ;
-// }
-
-// template<Piece P>
-// auto attacks_magic(const Bitboard *magic_nums)
-// {
-//     static Bitboard table[87988];
-
-//     std::array<BlackMagic<P>, 64> magics = {};
-
-//     size_t offset = 0;
-
-//     for (auto s : Squares()) {
-
-//         auto edges = 
-//             ((rank_bb(RANK_1) | rank_bb(RANK_8)) & ~rank_bb(rank(s))) | 
-//             ((file_bb(FILE_A) | file_bb(FILE_H)) & ~file_bb(file(s)));
-//         auto mask = attacks_sliding(P, s, 0) & ~edges;
-
-//         magics[s].mask      = ~mask;
-//         magics[s].magic     = magic_nums[s];
-//         magics[s].attacks   = &table[offset];
-
-//         for (Bitboard idx = 0; idx < bit(64 - BlackMagic<P>::shift); ++idx) {
-
-//             auto occ = attacks_occupancy(idx, mask);
-//             auto att = attacks_sliding(P, s, occ);
-
-//             occ = occ * magics[s].magic >> BlackMagic<P>::shift;
-
-//             table[offset + occ] = att;
-//         }
-//     }
-//     return magics;
-// }
-
-constexpr bool same_line(Square s1, Square s2)
+template<Piece P>
+auto attacks_magic(Bitboard *table, const MagicInit *init)
 {
-    return rank(s1) == rank(s2) || file(s1) == file(s2);
-}
+    std::array<Magic<P>, 64> magics;
 
-constexpr bool same_diag(Square s1, Square s2)
-{
-    return  rank(s2) - rank(s1) == file(s2) - file(s1) ||
-            rank(s2) - rank(s1) +  file(s2) - file(s1) == 0;
+    for (auto s : Squares()) {
+
+        auto edges = 
+            ((rank_bb(RANK_1) | rank_bb(RANK_8)) & ~rank_bb(rank(s))) | 
+            ((file_bb(FILE_A) | file_bb(FILE_H)) & ~file_bb(file(s)));
+        auto mask = attacks_sliding(P, s, 0) & ~edges;
+        auto att = &table[init[s].idx];
+
+        magics[s].mask  = mask;
+        magics[s].magic = init[s].num;
+        magics[s].att   = att;
+
+        auto occ = 0; // Carry-Rippler method to iterate over all subsets of mask
+        do {
+            att[magics[s].idx(occ)] = attacks_sliding(P, s, occ);
+            occ = (occ - mask) & mask;
+        } while (occ);
+    }
+    return magics;
 }
 
 }

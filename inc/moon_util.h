@@ -19,6 +19,17 @@ constexpr void clr(Bitboard &bb, Square s)  { bb &= ~bit(s); }
 constexpr auto cnt(Bitboard bb)             { return std::popcount(bb); }
 constexpr auto lsb(Bitboard bb)             { return std::countr_zero(bb); }
 
+constexpr bool same_line(Square s1, Square s2)
+{
+    return rank(s1) == rank(s2) || file(s1) == file(s2);
+}
+
+constexpr bool same_diag(Square s1, Square s2)
+{
+    return  rank(s2) - rank(s1) == file(s2) - file(s1) ||
+            rank(s2) - rank(s1) +  file(s2) - file(s1) == 0;
+}
+
 struct BitIter {
     constexpr BitIter(Bitboard bb) : bb{bb} {}
     constexpr BitIter begin()           { return bb; }

@@ -107,6 +107,45 @@ TEST(Util, Square)
     EXPECT_EQ(sq(RANK_8, FILE_H), H8);
 }
 
+TEST(Bitboard, RankAndFileBB)
+{
+    EXPECT_EQ(rank_bb(RANK_1), 0x00000000'000000ff);
+    EXPECT_EQ(rank_bb(RANK_2), 0x00000000'0000ff00);
+    EXPECT_EQ(rank_bb(RANK_7), 0x00ff0000'00000000);
+    EXPECT_EQ(rank_bb(RANK_8), 0xff000000'00000000);
+
+    EXPECT_EQ(file_bb(FILE_A), 0x01010101'01010101);
+    EXPECT_EQ(file_bb(FILE_B), 0x02020202'02020202);
+    EXPECT_EQ(file_bb(FILE_G), 0x40404040'40404040);
+    EXPECT_EQ(file_bb(FILE_H), 0x80808080'80808080);
+}
+
+TEST(Bitboard, SameLine)
+{
+    EXPECT_EQ(same_line(A1, A1), true);
+    EXPECT_EQ(same_line(A1, A8), true);
+    EXPECT_EQ(same_line(G5, B5), true);
+    EXPECT_EQ(same_line(H2, H7), true);
+
+    EXPECT_EQ(same_line(A1, B2), false);
+    EXPECT_EQ(same_line(A1, C8), false);
+    EXPECT_EQ(same_line(G5, F4), false);
+    EXPECT_EQ(same_line(H2, A1), false);
+}
+
+TEST(Bitboard, SameDiagonal)
+{
+    EXPECT_EQ(same_diag(A1, B2), true);
+    EXPECT_EQ(same_diag(D2, H6), true);
+    EXPECT_EQ(same_diag(B7, H1), true);
+    EXPECT_EQ(same_diag(C1, A3), true);
+
+    EXPECT_EQ(same_diag(A1, A8), false);
+    EXPECT_EQ(same_diag(A1, H1), false);
+    EXPECT_EQ(same_diag(G7, G6), false);
+    EXPECT_EQ(same_diag(G7, B7), false);
+}
+
 TEST(Util, BitIterator)
 {
     auto bb = bit(A1, B2, C3, D4, E5, F6, G7, H8);

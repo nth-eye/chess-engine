@@ -3,45 +3,6 @@
 
 using namespace moon;
 
-TEST(Bitboard, RankAndFileBB)
-{
-    EXPECT_EQ(rank_bb(RANK_1), 0x00000000'000000ff);
-    EXPECT_EQ(rank_bb(RANK_2), 0x00000000'0000ff00);
-    EXPECT_EQ(rank_bb(RANK_7), 0x00ff0000'00000000);
-    EXPECT_EQ(rank_bb(RANK_8), 0xff000000'00000000);
-
-    EXPECT_EQ(file_bb(FILE_A), 0x01010101'01010101);
-    EXPECT_EQ(file_bb(FILE_B), 0x02020202'02020202);
-    EXPECT_EQ(file_bb(FILE_G), 0x40404040'40404040);
-    EXPECT_EQ(file_bb(FILE_H), 0x80808080'80808080);
-}
-
-TEST(Bitboard, SameLine)
-{
-    EXPECT_EQ(same_line(A1, A1), true);
-    EXPECT_EQ(same_line(A1, A8), true);
-    EXPECT_EQ(same_line(G5, B5), true);
-    EXPECT_EQ(same_line(H2, H7), true);
-
-    EXPECT_EQ(same_line(A1, B2), false);
-    EXPECT_EQ(same_line(A1, C8), false);
-    EXPECT_EQ(same_line(G5, F4), false);
-    EXPECT_EQ(same_line(H2, A1), false);
-}
-
-TEST(Bitboard, SameDiagonal)
-{
-    EXPECT_EQ(same_diag(A1, B2), true);
-    EXPECT_EQ(same_diag(D2, H6), true);
-    EXPECT_EQ(same_diag(B7, H1), true);
-    EXPECT_EQ(same_diag(C1, A3), true);
-
-    EXPECT_EQ(same_diag(A1, A8), false);
-    EXPECT_EQ(same_diag(A1, H1), false);
-    EXPECT_EQ(same_diag(G7, G6), false);
-    EXPECT_EQ(same_diag(G7, B7), false);
-}
-
 TEST(Bitboard, Shift)
 {
     auto bb = bit(B2);
@@ -102,6 +63,19 @@ TEST(Bitboard, SlidingAttacksNoBlock)
     EXPECT_EQ(attacks_sliding(BISHOP, H8, 0), bit(A1, B2, C3, D4, E5, F6, G7));
     EXPECT_EQ(attacks_sliding(BISHOP, B8, 0), bit(A7, C7, D6, E5, F4, G3, H2));
     EXPECT_EQ(attacks_sliding(BISHOP, D4, 0), bit(A1, B2, C3, E5, F6, G7, H8, A7, B6, C5, E3, F2, G1));
+}
+
+TEST(Bitboard, SlidingAttacksWithBlock)
+{
+    EXPECT_EQ(attacks_sliding(ROOK, D4, bit(D1, A4, H4, D8)), bit(D1, D2, D3, D5, D6, D7, D8, A4, B4, C4, E4, F4, G4, H4));
+    EXPECT_EQ(attacks_sliding(ROOK, D4, bit(D2, B4, G4, D7)), bit(D2, D3, D5, D6, D7, B4, C4, E4, F4, G4));
+    EXPECT_EQ(attacks_sliding(ROOK, D4, bit(D1, D2, A4, B4, H4, G4, D7, D8)), bit(D2, D3, D5, D6, D7, B4, C4, E4, F4, G4));
+    EXPECT_EQ(attacks_sliding(ROOK, D4, bit(D3, C4, D5, E4)), bit(D3, D5, C4, E4));
+
+    EXPECT_EQ(attacks_sliding(BISHOP, D4, bit(A1, A7, G1, H8)), bit(A1, B2, C3, E5, F6, G7, H8, A7, B6, C5, E3, F2, G1));
+    EXPECT_EQ(attacks_sliding(BISHOP, D4, bit(B2, B6, F2, G7)), bit(B2, C3, E5, F6, G7, B6, C5, E3, F2));
+    EXPECT_EQ(attacks_sliding(BISHOP, D4, bit(A1, B2, A7, B6, G1, F2, H8, G7)), bit(B2, C3, E5, F6, G7, B6, C5, E3, F2));
+    EXPECT_EQ(attacks_sliding(BISHOP, D4, bit(C3, C5, E3, E5)), bit(C3, C5, E3, E5));
 }
 
 TEST(Bitboard, PawnAttacks)
