@@ -4,11 +4,13 @@ namespace moon {
 
 namespace {
 
-// Bitboard MAGIC_TABLE[87988];
+Bitboard magic_table[88772];
 
-constexpr auto P_ATTACKS    = std::array{ attacks(PAWN), attacks(PAWN, BLACK) };
-constexpr auto N_ATTACKS    = attacks(KNIGHT);
-constexpr auto K_ATTACKS    = attacks(KING);
+constexpr auto p_attacks    = std::array{ attacks(PAWN), attacks(PAWN, BLACK) };
+constexpr auto n_attacks    = attacks(KNIGHT);
+constexpr auto k_attacks    = attacks(KING);
+const auto b_attacks        = attacks_magic<BISHOP>(magic_table);
+const auto r_attacks        = attacks_magic<ROOK>(magic_table);
 
 }
 

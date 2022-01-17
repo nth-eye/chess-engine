@@ -3,6 +3,12 @@
 
 using namespace moon;
 
+namespace {
+
+Bitboard magic_table[88772];
+
+}
+
 TEST(Bitboard, Shift)
 {
     auto bb = bit(B2);
@@ -124,4 +130,34 @@ TEST(Bitboard, KingAttacks)
     EXPECT_EQ(att[H2], bit(H3, G3, G2, G1, H1));
     EXPECT_EQ(att[G1], bit(F1, F2, G2, H2, H1));
     EXPECT_EQ(att[H1], bit(G1, G2, H2));
+}
+
+TEST(Bitboard, BishopMagicAttacks)
+{
+    auto att = attacks_magic<BISHOP>(magic_table);
+    for (auto s : Squares()) {
+        auto edges = 
+            ((rank_bb(RANK_1) | rank_bb(RANK_8)) & ~rank_bb(rank(s))) | 
+            ((file_bb(FILE_A) | file_bb(FILE_H)) & ~file_bb(file(s)));
+        auto mask = attacks_sliding(BISHOP, s, 0) & ~edges;
+        auto occ = 0;
+        do {
+            EXPECT_EQ(att[s][occ], attacks_sliding(BISHOP, s, occ));
+        } while ((occ = (occ - mask) & mask));
+    }
+}
+
+TEST(Bitboard, RookMagicAttacks)
+{
+    auto att = attacks_magic<ROOK>(magic_table);
+    for (auto s : Squares()) {
+        auto edges = 
+            ((rank_bb(RANK_1) | rank_bb(RANK_8)) & ~rank_bb(rank(s))) | 
+            ((file_bb(FILE_A) | file_bb(FILE_H)) & ~file_bb(file(s)));
+        auto mask = attacks_sliding(ROOK, s, 0) & ~edges;
+        auto occ = 0;
+        do {
+            EXPECT_EQ(att[s][occ], attacks_sliding(ROOK, s, occ));
+        } while ((occ = (occ - mask) & mask));
+    }
 }
