@@ -7,10 +7,11 @@
 namespace moon {
 
 using Bitboard = uint64_t;
+using Move = uint16_t;
 
-enum Piece  { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 enum File   { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H };
 enum Rank   { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8 };
+enum Piece  { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 enum Color  { WHITE, BLACK };
 enum Square {  
     A1, B1, C1, D1, E1, F1, G1, H1,
@@ -31,6 +32,29 @@ enum Direction {
     SOUTH_EAST  = SOUTH + EAST,
     SOUTH_WEST  = SOUTH + WEST,
     NORTH_WEST  = NORTH + WEST,
+};
+enum Castle { 
+    NO_CA, 
+    WKCA        = 0b0001,
+    WQCA        = 0b0010, 
+    BKCA        = 0b0100, 
+    BQCA        = 0b1000,
+    KCA         = WKCA | BKCA,
+    QCA         = WQCA | BQCA,
+    WCA         = WKCA | WQCA,
+    BCA         = BKCA | BQCA,
+    ANY_CA      = WCA  | BCA,
+};
+enum { 
+    QUIET   = 0b0000'0000'0000'0000, 
+    PUSH    = 0b0001'0000'0000'0000,
+    K_CAST  = 0b0010'0000'0000'0000,
+    Q_CAST  = 0b0011'0000'0000'0000,
+    N_PROM  = 0b0100'0000'0000'0000,
+    B_PROM  = 0b0101'0000'0000'0000,
+    R_PROM  = 0b0110'0000'0000'0000,
+    Q_PROM  = 0b0111'0000'0000'0000,
+    ENPASS  = 0b1000'0000'0000'0000,
 };
 
 }

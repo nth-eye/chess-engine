@@ -19,6 +19,12 @@ constexpr void clr(Bitboard &bb, Square s)  { bb &= ~bit(s); }
 constexpr auto cnt(Bitboard bb)             { return std::popcount(bb); }
 constexpr auto lsb(Bitboard bb)             { return std::countr_zero(bb); }
 
+constexpr auto from(Move m)                     { return Square(m & 0x3f); }
+constexpr auto to(Move m)                       { return from(m >> 6); }
+constexpr auto flag(Move m)                     { return m & 0xf000; }
+constexpr Move mv(Square s, Square d)           { return (d << 6) | s; }
+constexpr Move mv(Square s, Square d, int flag) { return flag | (d << 6) | s; }
+
 constexpr bool same_line(Square s1, Square s2)
 {
     return rank(s1) == rank(s2) || file(s1) == file(s2);
@@ -67,6 +73,21 @@ using Squares   = EnumIter<Square, A1, H8>;
 using Files     = EnumIter<File, FILE_A, FILE_H>;
 using Ranks     = EnumIter<Rank, RANK_1, RANK_8>;
 using RanksRev  = EnumIterRev<Rank, RANK_1, RANK_8>;
+
+struct Moves {
+    const Move* begin() const                   { return &list[0]; }
+    const Move* end() const                     { return &list[len]; }
+    Move* begin()                               { return &list[0]; }
+    Move* end()                                 { return &list[len]; }
+    size_t size() const                         { return len; }
+    void erase(size_t idx)                      { list[idx] = list[--len]; }
+    void save(Move m)                           { list[len++] = m; }
+    void save(Square src, Square dst)           { save(mv(src, dst)); }
+    void save(Square src, Square dst, int flag) { save(mv(src, dst, flag)); }
+private:
+    Move list[412];
+    size_t len = 0;
+};
 
 }
 

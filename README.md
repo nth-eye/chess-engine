@@ -7,8 +7,10 @@ time and implement magic bitboards as minimalistically as possible.
 
 ## TODO
 
-- [x] Tests: util
-- [ ] Tests: bitboard
+- [x] Tests: 
+    - [x] util
+    - [x] bitboard
+    - [ ] board    
 - [ ] Old todos:
     - [ ] Optimize movegen
     - [ ] Fix evaluation and add position into account

@@ -5,6 +5,12 @@
 
 namespace moon {
 
+struct Board {
+
+
+
+};
+
 }
 
 #endif

@@ -1,7 +1,7 @@
 #include "moon_board.h"
+#include "moon_log.h"
 
 namespace moon {
-
 namespace {
 
 Bitboard magic_table[88772];
