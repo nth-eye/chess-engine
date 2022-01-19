@@ -2,7 +2,7 @@
 #define MOON_LOG_H
 
 #include <cstdio>
-#include "moon_util.h"
+#include "moon_board.h"
 
 namespace moon {
 
@@ -18,12 +18,13 @@ namespace moon {
 
 constexpr char file_c(File f)   { return 'a' + f; }
 constexpr char rank_c(Rank r)   { return '1' + r; }
-constexpr char side_c(Color c)  { return c == WHITE ? 'w' : 'b'; }
+constexpr char side_c(Side c)   { return c == WHITE ? 'w' : 'b'; }
 
 void print_bb(Bitboard b);
 void print_sq(Square s);
 void print_mv(Move m);
-void print_moves(const Moves &list);
+void print_moves(const Moves &l);
+void print_board(const Board &b);
 
 }
 

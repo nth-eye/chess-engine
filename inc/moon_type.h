@@ -12,7 +12,7 @@ using Move = uint16_t;
 enum File   { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H };
 enum Rank   { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8 };
 enum Piece  { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
-enum Color  { WHITE, BLACK };
+enum Side   { WHITE, BLACK };
 enum Square {  
     A1, B1, C1, D1, E1, F1, G1, H1,
     A2, B2, C2, D2, E2, F2, G2, H2,
@@ -45,7 +45,7 @@ enum Castle {
     BCA         = BKCA | BQCA,
     ANY_CA      = WCA  | BCA,
 };
-enum { 
+enum Flag { 
     QUIET   = 0b0000'0000'0000'0000, 
     PUSH    = 0b0001'0000'0000'0000,
     K_CAST  = 0b0010'0000'0000'0000,

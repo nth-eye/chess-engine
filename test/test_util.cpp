@@ -107,7 +107,49 @@ TEST(Util, Square)
     EXPECT_EQ(sq(RANK_8, FILE_H), H8);
 }
 
-TEST(Bitboard, RankAndFileBB)
+TEST(Util, SquareAndDirection)
+{
+    EXPECT_EQ(A1 + NORTH, A2);
+    EXPECT_EQ(H8 + SOUTH, H7);
+    EXPECT_EQ(A1 + EAST, B1);
+    EXPECT_EQ(H8 + WEST, G8);
+    EXPECT_EQ(A1 + NORTH_EAST, B2);
+    EXPECT_EQ(H1 + NORTH_WEST, G2);
+    EXPECT_EQ(A8 + SOUTH_EAST, B7);
+    EXPECT_EQ(H8 + SOUTH_WEST, G7);
+
+    EXPECT_EQ(D4 - NORTH, D3);
+    EXPECT_EQ(D4 - SOUTH, D5);
+    EXPECT_EQ(D4 - EAST, C4);
+    EXPECT_EQ(D4 - WEST, E4);
+    EXPECT_EQ(D4 - NORTH_EAST, C3);
+    EXPECT_EQ(D4 - NORTH_WEST, E3);
+    EXPECT_EQ(D4 - SOUTH_EAST, C5);
+    EXPECT_EQ(D4 - SOUTH_WEST, E5);
+}
+
+TEST(Util, Side)
+{
+    EXPECT_EQ(~BLACK, WHITE);
+    EXPECT_EQ(~WHITE, BLACK);
+}
+
+TEST(Util, Move)
+{
+    Move m = mv(A1, D1);
+
+    EXPECT_EQ(from(m), A1);
+    EXPECT_EQ(to(m), D1);
+    EXPECT_EQ(flag(m), QUIET);
+
+    m = mv(H8, H7, PUSH);
+
+    EXPECT_EQ(from(m), H8);
+    EXPECT_EQ(to(m), H7);
+    EXPECT_EQ(flag(m), PUSH);
+}
+
+TEST(Util, RankAndFileBB)
 {
     EXPECT_EQ(rank_bb(RANK_1), 0x00000000'000000ff);
     EXPECT_EQ(rank_bb(RANK_2), 0x00000000'0000ff00);
@@ -120,7 +162,7 @@ TEST(Bitboard, RankAndFileBB)
     EXPECT_EQ(file_bb(FILE_H), 0x80808080'80808080);
 }
 
-TEST(Bitboard, SameLine)
+TEST(Util, SameLine)
 {
     EXPECT_EQ(same_line(A1, A1), true);
     EXPECT_EQ(same_line(A1, A8), true);
@@ -133,7 +175,7 @@ TEST(Bitboard, SameLine)
     EXPECT_EQ(same_line(H2, A1), false);
 }
 
-TEST(Bitboard, SameDiagonal)
+TEST(Util, SameDiagonal)
 {
     EXPECT_EQ(same_diag(A1, B2), true);
     EXPECT_EQ(same_diag(D2, H6), true);
@@ -179,3 +221,4 @@ TEST(Util, EnumIterators)
     EXPECT_EQ(*RanksRev().begin(), RANK_8);
     EXPECT_EQ(*RanksRev().end(), RANK_1 - 1);
 }
+

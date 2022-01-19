@@ -19,7 +19,7 @@ constexpr Bitboard shift(Bitboard b, Direction d)
         case SOUTH_EAST: return (b & ~file_bb(FILE_H)) >> 7;
         case SOUTH_WEST: return (b & ~file_bb(FILE_A)) >> 9;
     }
-    assert(false);
+    assert(false); return 0;
 }
 
 constexpr auto shift(Bitboard b, auto dirs)
@@ -50,7 +50,7 @@ constexpr auto attacks_sliding(Piece p, Square s, Bitboard block)
     return att;
 }
 
-constexpr auto attacks(Piece p, Color c = WHITE)
+constexpr auto attacks(Piece p, Side c = WHITE)
 {
     std::array<Bitboard, 64> att = {};
 
