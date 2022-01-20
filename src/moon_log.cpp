@@ -54,20 +54,24 @@ void print_board(const Board &b)
             Square s    = sq(r, f);
             char c      = ' ';
 
-            if (!get(b.all(), s))
+            if (!get(b.p_all(), s))
                 c = '.';
-            else if (get(b.kings(), s))
-                c = 'k';
-            else if (get(b.pawns, s))
+            else if (get(b.p_pawns(), s))
                 c = 'p';
-            else if (get(b.bishops, s))
-                c = get(b.rooks, s) ? 'q' : 'b';
-            else if (get(b.rooks, s))
-                c = 'r';
-            else
+            else if (get(b.p_knights(), s))
                 c = 'n';
+            else if (get(b.p_bishops(), s))
+                c = 'b';
+            else if (get(b.p_rooks(), s))
+                c = 'r';
+            else if (get(b.p_queens(), s))
+                c = 'q';
+            else if (get(b.p_kings(), s))
+                c = 'k';
+            else
+                c = 'x';
 
-            if (get(b.pieces[WHITE], s)) 
+            if (get(b.p_whites(), s)) 
                 c ^= bit(5);
 
             out("%c ", c);
@@ -79,17 +83,17 @@ void print_board(const Board &b)
         out(" %c", file_c(f));
     out("\n\n");
     out("cast:  %c%c%c%c    \n", 
-        b.castle & WKCA ? 'K' : '-', b.castle & WQCA ? 'Q' : '-', 
-        b.castle & BKCA ? 'k' : '-', b.castle & BQCA ? 'q' : '-');
+        b.ca_rights() & WKCA ? 'K' : '-', b.ca_rights() & WQCA ? 'Q' : '-', 
+        b.ca_rights() & BKCA ? 'k' : '-', b.ca_rights() & BQCA ? 'q' : '-');
     out("enps:  ");
-    if (b.enps_sq)
-        print_sq(b.enps_sq);
+    if (b.sq_enps() != NO_SQ)
+        print_sq(b.sq_enps());
     else
         out("-");
     out("\n");
-    out("half:  %u          \n", b.half_clk);
-    out("full:  %u          \n", b.full_clk);
-    out("side:  %c          \n", side_c(b.side));
+    out("half:  %u          \n", b.ply50());
+    out("full:  %u          \n", b.ply() / 2 + 1);
+    out("side:  %c          \n", side_c(b.turn()));
     out("size:  %lu bytes   \n", sizeof(Board));
     out("\n");
 }

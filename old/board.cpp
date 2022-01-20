@@ -318,12 +318,6 @@ void Board::moves_all(MoveList &list) const
 
     add_moves(king, to_go, list);
 
-    Bitboard checkers = 
-        (N_ATTACKS[king]        & they & knights()) |
-        (P_ATTACKS[Side][king]  & they & pawns)     |
-        (B_ATTACKS[king][both]  & they & bishops)   |
-        (R_ATTACKS[king][both]  & they & rooks);
-
     Bitboard pinned     = 0;
     Bitboard pinners    = 
         (B_ATTACKS[king][they]  & they & bishops) |
@@ -340,6 +334,11 @@ void Board::moves_all(MoveList &list) const
     Bitboard capture_mask;
     Bitboard quiet_mask;
     Bitboard legal_mask;
+    Bitboard checkers = 
+        (N_ATTACKS[king]        & they & knights()) |
+        (P_ATTACKS[Side][king]  & they & pawns)     |
+        (B_ATTACKS[king][both]  & they & bishops)   |
+        (R_ATTACKS[king][both]  & they & rooks);
 
     switch (cnt(checkers)) {
 
