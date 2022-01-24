@@ -5,16 +5,27 @@
 
 using namespace moon;
 
-template<size_t N = 1, class Fn, class ...Args>
-clock_t measure_time(Fn &&fn, Args &&...args)
+template<size_t N = 1, class Fn, class Ptr, class ...Args>
+clock_t measure_time(Fn &&fn, Ptr *ptr, Args &&...args)
 {
     clock_t begin = clock();
     for (size_t i = 0; i < N; ++i) 
-        fn(args...);
+        (ptr->*fn)(args...);
     clock_t end = clock();
 
-    return (end - begin); // / N;
+    return (end - begin);// / N;
 }
+
+// template<size_t N = 1, class Fn, class ...Args>
+// clock_t measure_time(Fn &&fn, Args &&...args)
+// {
+//     clock_t begin = clock();
+//     for (size_t i = 0; i < N; ++i) 
+//         fn(args...);
+//     clock_t end = clock();
+
+//     return (end - begin); // / N;
+// }
 
 // template<bool Root = true>
 // uint64_t perft_(Board board, int depth) 
@@ -76,10 +87,39 @@ int main(int, char**)
 {
     printf("sizeof Board: %lu \n", sizeof(moon::Board));
 
-    // Board board;
+    constexpr auto test = "7k/2r5/8/2R5/8/2K5/8/8 w - - 0 1";
+    constexpr auto a = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; // "7k/2r3b1/8/2R5/8/2K5/8/8 w - - 0 1";
+    
+    Moves list;
+    Board board;
 
-    // board.init(FEN_START);
-    // board.print();
+    board.set_fen(fen::START);
+    board.moves_all(list);
+    
+    print_board(board);
+    print_moves(list);
+
+    // auto them_p = board.pieces[~board.side] & board.pawns;
+    // auto pawn_att = shift()
+
+    // print_bb(them_p);
+    // print_bb(board.restricted());
+
+    // printf("2: %lu clock_t \n", measure_time<1000000000>(&Board::restricted_2, &board));
+    // printf("2: %lu clock_t \n", measure_time<1000000000>(&Board::restricted_2, &board));
+    // printf("2: %lu clock_t \n", measure_time<1000000000>(&Board::restricted_2, &board));
+
+    // printf("1: %lu clock_t \n", measure_time<1000000000>(&Board::restricted, &board));
+    // printf("1: %lu clock_t \n", measure_time<1000000000>(&Board::restricted, &board));
+    // printf("1: %lu clock_t \n", measure_time<1000000000>(&Board::restricted, &board));
+
+    // print_bb(board.pinned());
+    // print_bb(board.checkers());
+    // print_bb(board.restricted());
+
+
+    // board.moves_pawn_quiet(list);
+    // print_moves(list);
 
     // perft(board, 5);
     // const auto occ = bit(D3);

@@ -57,12 +57,27 @@ struct Board {
     Board(const Board &b) = default;
     // Board(const Board &b, Move m) : Board(b) { make(m); }
 
-    bool init(const char *fen);
-    // void make(Move move);
+    bool set_fen(const char *fen);
+    bool get_fen(char *fen);
 
+    bool attacked(Color c, Square s) const;
+    bool attacked(Color c, Square s, auto... more) const        { return attacked(c, s) && attacked(c, more...); }
+    bool not_attacked(Color c, Square s) const                  { return !attacked(c, s); }
+    bool not_attacked(Color c, Square s, auto... more) const    { return not_attacked(c, s) && not_attacked(c, more...); }
+
+    void moves_pawn_quiet(Moves &list) const;
+    void moves_pawn_captures(Moves &list);
+    void moves_all(Moves &list);
+
+    void make(Move move);
+
+    Bitboard restricted() const;
+    Bitboard pinned() const;
+    Bitboard checkers() const;
+
+    Bitboard p_all() const      { return pieces[WHITE] | pieces[BLACK]; }
     Bitboard p_whites() const   { return pieces[WHITE]; }
     Bitboard p_blacks() const   { return pieces[BLACK]; }
-    Bitboard p_all() const      { return pieces[WHITE] | pieces[BLACK]; }
     Bitboard p_pawns() const    { return pawns; }
     Bitboard p_knights() const  { return knights; }
     Bitboard p_bishops() const  { return bishops & ~rooks; }
@@ -75,8 +90,8 @@ struct Board {
     Castle ca_rights() const    { return castle; }
     uint8_t ply50() const       { return half_clk; }
     uint16_t ply() const        { return full_clk; }
-    Side turn() const           { return side; }
-private:
+    Color turn() const          { return side; }
+// private:
     Bitboard pieces[2]          = {};
     Bitboard pawns              = 0;
     Bitboard knights            = 0;
@@ -85,7 +100,7 @@ private:
     Square   k_sq[2]            = {NO_SQ, NO_SQ};
     Square   enps_sq            = NO_SQ;
     Castle   castle             = NO_CA;
-    Side     side               = WHITE;
+    Color     side               = WHITE;
     uint8_t  half_clk           = 0;
     uint16_t full_clk           = 0;
 };

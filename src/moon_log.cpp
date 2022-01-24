@@ -39,7 +39,7 @@ void print_moves(const Moves &l)
 {
 	out("%lu moves\n", l.size());
 	for (const auto move : l) {
-        out("\n move: %04x  ", move);
+        out("\n move_%04x: ", move);
         print_mv(move);
     }
 }

@@ -10,7 +10,7 @@ constexpr Bitboard bit(int i)               { return 1ul << i; }
 constexpr Bitboard bit(int i, auto... more) { return bit(i) | bit(more...); }
 constexpr Bitboard rank_bb(Rank r)          { return 0x00000000000000ffULL << (r << 3); }
 constexpr Bitboard file_bb(File f)          { return 0x0101010101010101ULL << f; }
-constexpr auto operator~(Side c)            { return Side(c ^ BLACK); }
+constexpr auto operator~(Color c)           { return Color(c ^ BLACK); }
 constexpr auto file(Square s)               { return File(s & 7); }
 constexpr auto rank(Square s)               { return Rank(s >> 3); }
 constexpr auto sq(Rank r, File f)           { return Square((r << 3) + f); }

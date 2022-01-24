@@ -421,12 +421,12 @@ void Board::moves_pawn(Bitboard selected_pawns, Bitboard capture_mask, Bitboard 
 
     for (auto src : BitIter(selected_pawns)) {
 
+        Bitboard bb = P_ATTACKS[Side][src] & capture_mask;
+
+        if (Pinned)
+            bb &= LINE_BB[king][src];
+
         if (rank(src) == prom_r) {
-
-            Bitboard bb = P_ATTACKS[Side][src] & capture_mask;
-
-            if (Pinned)
-                bb &= LINE_BB[king][src];
 
             for (auto dst : BitIter(bb))
                 for (auto type : PROMOTIONS)
@@ -441,10 +441,6 @@ void Board::moves_pawn(Bitboard selected_pawns, Bitboard capture_mask, Bitboard 
                 for (auto type : PROMOTIONS)
                     list.save(src, dst, type);
         } else {
-            Bitboard bb = P_ATTACKS[Side][src] & capture_mask;
-            
-            if (Pinned)
-                bb &= LINE_BB[king][src];
             
             add_moves(src, bb, list);
 

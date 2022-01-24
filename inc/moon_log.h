@@ -18,7 +18,7 @@ namespace moon {
 
 constexpr char file_c(File f)   { return 'a' + f; }
 constexpr char rank_c(Rank r)   { return '1' + r; }
-constexpr char side_c(Side c)   { return c == WHITE ? 'w' : 'b'; }
+constexpr char side_c(Color c)  { return c == WHITE ? 'w' : 'b'; }
 
 void print_bb(Bitboard b);
 void print_sq(Square s);

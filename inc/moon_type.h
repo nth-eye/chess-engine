@@ -12,7 +12,7 @@ using Move = uint16_t;
 enum File   { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H };
 enum Rank   { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8 };
 enum Piece  { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
-enum Side   { WHITE, BLACK };
+enum Color  { WHITE, BLACK };
 enum Square {  
     A1, B1, C1, D1, E1, F1, G1, H1,
     A2, B2, C2, D2, E2, F2, G2, H2,
@@ -33,6 +33,14 @@ enum Direction {
     SOUTH_EAST  = SOUTH + EAST,
     SOUTH_WEST  = SOUTH + WEST,
     NORTH_WEST  = NORTH + WEST,
+    NORTH_NORTH_EAST    = NORTH + NORTH + EAST,
+    NORTH_NORTH_WEST    = NORTH + NORTH + WEST,
+    NORTH_EAST_EAST     = NORTH + EAST + EAST,
+    NORTH_WEST_WEST     = NORTH + WEST + WEST,
+    SOUTH_SOUTH_EAST    = SOUTH + SOUTH + EAST,
+    SOUTH_SOUTH_WEST    = SOUTH + SOUTH + WEST,
+    SOUTH_EAST_EAST     = SOUTH + EAST + EAST,
+    SOUTH_WEST_WEST     = SOUTH + WEST + WEST,
 };
 enum Castle { 
     NO_CA, 
