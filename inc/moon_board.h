@@ -55,11 +55,12 @@ struct Board {
 
     Board() = default;
     Board(const Board &b) = default;
-    // Board(const Board &b, Move m) : Board(b) { make(m); }
+    Board(const Board &b, Move m) : Board(b) { make(m); }
 
     bool set_fen(const char *fen);
     bool get_fen(char *fen);
 
+    bool legal(Move move) const;
     bool attacked(Color c, Square s) const;
     bool attacked(Color c, Square s, auto... more) const        { return attacked(c, s) && attacked(c, more...); }
     bool not_attacked(Color c, Square s) const                  { return !attacked(c, s); }
